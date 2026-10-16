@@ -1,0 +1,1963 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Dino-Ausgrabung</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.g{font-family:'Fredoka',system-ui,sans-serif}
+:where(.g button){font-family:inherit;padding:0;border:0;background:none;cursor:pointer}
+.hide{display:none}
+.spot{position:absolute;z-index:5}
+.spot svg{display:block;transition:transform .15s}
+.spot:hover svg{transform:scale(1.06)}
+.spot.wig{animation:wig .5s}
+.nav{position:absolute;width:100px;height:100px;z-index:6;transition:transform .15s}
+.nav:hover{transform:scale(1.08)}
+.hud{position:absolute;top:16px;width:64px;height:64px;z-index:50;transition:transform .15s}
+.hud:hover{transform:scale(1.1)}
+.slot{position:absolute;width:72px;height:72px;border-radius:50%;border:4px dashed transparent;z-index:8}
+.slot.hint{border-color:#ffb300;background:rgba(255,200,0,.2);animation:pulse 1.1s infinite}
+.slot.wig{animation:wig .5s}
+.inv{position:absolute;top:622px;width:86px;height:86px;border-radius:20px;background:#fff3d6;border:5px solid #2b2118;z-index:31;transition:transform .15s}
+.inv .ico{display:block;width:64px;height:64px;margin:auto}
+.inv.empty .ico{opacity:.22;filter:grayscale(1)}
+.inv.done .ico{opacity:.4}
+.inv.sel{background:#ffe27a;border-color:#d97706;transform:translateY(-10px)}
+.inv.popin{animation:popin .6s ease-out}
+.tool{position:absolute;top:622px;width:86px;height:86px;border-radius:20px;background:#d9ecff;border:5px solid #2b2118;z-index:31;transition:transform .15s}
+.tool .ico{display:block;width:64px;height:64px;margin:auto}
+.tool.sel{background:#8ed0ff;border-color:#1d6fd8;transform:translateY(-10px)}
+.tool.hint{animation:pulse 1.1s infinite}
+.dot{position:absolute;top:650px;width:44px;height:44px;border-radius:50%;background:#fff3d6;border:4px solid #2b2118;font-size:18px;font-weight:700;color:#2b2118;z-index:31;display:flex;align-items:center;justify-content:center}
+.dot.done{background:#8be28b}
+.dot.cur{background:#ffd23f;transform:translateY(-6px)}
+.card{position:absolute;width:214px;height:228px;border-radius:24px;border:6px solid #2b2118;background:#fff3d6;overflow:hidden;z-index:6;transition:transform .15s;display:flex;flex-direction:column;align-items:center;color:#2b2118;padding-top:8px;box-sizing:border-box}
+.card:hover{transform:translateY(-8px) rotate(-1deg)}
+.thumb{width:186px;height:96px;border-radius:14px;border:4px solid #2b2118;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:700;color:#fff;text-shadow:3px 3px 0 #2b2118,-2px -2px 0 #2b2118,2px -2px 0 #2b2118,-2px 2px 0 #2b2118}
+.thumb.th0{background:linear-gradient(#7fd0f2 60%,#f4d489 60%)}
+.thumb.th1{background:linear-gradient(#8fe3c8 60%,#8bc34a 60%)}
+.thumb.th2{background:linear-gradient(#8fd8ff 40%,#3aa7e0 40% 62%,#f7e2a8 62%)}
+.thumb.th3{background:linear-gradient(#9fb4c8 60%,#b9b2a6 60%)}
+.thumb.th4{background:linear-gradient(#0f1b3d 60%,#8a7aa0 60%)}
+.thumb.th5{background:linear-gradient(#7a2a1a 60%,#4a3a38 60%)}
+.thumb.th6{background:linear-gradient(#bfe3f5 60%,#f2f8ff 60%)}
+.thumb.th7{background:linear-gradient(#ffb070 60%,#d9915a 60%)}
+.thumb.th8{background:linear-gradient(#a7c79a 60%,#7a9a5a 60%)}
+.thumb.th9{background:linear-gradient(#6ec6ff 40%,#2f8fd0 40% 62%,#8bc34a 62%)}
+.g .again{width:52px;height:52px;border-radius:50%;background:#fff;border:4px solid #2b2118;display:flex;align-items:center;justify-content:center}
+.g .cbtn{height:52px;border-radius:26px;padding:0 20px;background:#fff;border:4px solid #2b2118;font-size:22px;font-weight:700;color:#2b2118;display:flex;align-items:center}
+.g button:focus-visible{outline:4px solid #1d6fd8;outline-offset:3px}
+.e{display:none}
+.th0 .e-sun,.th0 .e-cloud,.th0 .e-mesa,.th0 .e-cactus,.th0 .e-tent,.th0 .e-palmR,
+.th1 .e-sun,.th1 .e-cloud,.th1 .e-volcano,.th1 .e-palmL,.th1 .e-palmR,.th1 .e-fern,
+.th2 .e-sun,.th2 .e-cloud,.th2 .e-sea,.th2 .e-parasol,.th2 .e-palmR,
+.th3 .e-cloud,.th3 .e-peaks,.th3 .e-tent,.th3 .e-boulders,
+.th4 .e-moon,.th4 .e-mesa,.th4 .e-cactus,.th4 .e-tent,
+.th5 .e-volcano,.th5 .e-lava,.th5 .e-boulders,
+.th6 .e-peaks,.th6 .e-snow,.th6 .e-pines,.th6 .e-cloud,
+.th7 .e-sun,.th7 .e-mesa,.th7 .e-cactus,.th7 .e-boulders,
+.th8 .e-cloud,.th8 .e-pond,.th8 .e-fern,.th8 .e-palmL,.th8 .e-palmR,
+.th9 .e-sun,.th9 .e-cloud,.th9 .e-sea,.th9 .e-volcano,.th9 .e-palmL,.th9 .e-palmR{display:inline}
+.th2 .hl,.th9 .hl{display:none}
+.pitR{display:none}
+.lay-rect .pitE{display:none}
+.lay-rect .pitR{display:inline}
+.dx{display:none}
+.th0 .dx-d,.th1 .dx-j,.th2 .dx-s,.th3 .dx-g,.th4 .dx-n,.th5 .dx-v,.th6 .dx-i,.th7 .dx-c,.th8 .dx-m,.th9 .dx-p{display:inline}
+.th0 .mb{fill:#dcaa5a}.th0 .ms{fill:#b88a3e}.th0 .rb{fill:#c9885a}.th0 .hb{fill:#c99250}.th0 .lb{fill:#f0d79a}.th0 .lbs{stroke:#d1a95f}
+.th1 .mb{fill:#7a5a30}.th1 .ms{fill:#4e3a20}.th1 .rb{fill:#7f9a7a}.th1 .hb{fill:#6b4a2a}.th1 .lb{fill:#9cbf6a}.th1 .lbs{stroke:#6f9a42}
+.th2 .mb{fill:#f2dc9a}.th2 .ms{fill:#d8bc70}.th2 .rb{fill:#d9c7a8}.th2 .hb{fill:#ebd18a}.th2 .lb{fill:#f9ecc0}.th2 .lbs{stroke:#dcc680}
+.th3 .mb{fill:#a8a196}.th3 .ms{fill:#8a847a}.th3 .rb{fill:#6f7882}.th3 .hb{fill:#9a9387}.th3 .lb{fill:#c4beb2}.th3 .lbs{stroke:#9a9488}
+.th4 .mb{fill:#6e5e9a}.th4 .ms{fill:#54467c}.th4 .rb{fill:#5a6a9a}.th4 .hb{fill:#5a4c82}.th4 .lb{fill:#8a7ab8}.th4 .lbs{stroke:#6a5a98}
+.th5 .mb{fill:#4a3a38}.th5 .ms{fill:#2a1c1a}.th5 .rb{fill:#3a3a44}.th5 .hb{fill:#3a2a28}.th5 .lb{fill:#6a4a40}.th5 .lbs{stroke:#ff7a3d}
+.th6 .mb{fill:#e8f2fb}.th6 .ms{fill:#bcd4e8}.th6 .rb{fill:#a8cbe6}.th6 .hb{fill:#d4e6f4}.th6 .lb{fill:#f4faff}.th6 .lbs{stroke:#bcd4e8}
+.th7 .mb{fill:#d28450}.th7 .ms{fill:#a8602f}.th7 .rb{fill:#b8603a}.th7 .hb{fill:#c06a3c}.th7 .lb{fill:#e8a070}.th7 .lbs{stroke:#b8603a}
+.th8 .mb{fill:#5a6a3a}.th8 .ms{fill:#3e4a28}.th8 .rb{fill:#6a7a5a}.th8 .hb{fill:#4a5a30}.th8 .lb{fill:#8aa05a}.th8 .lbs{stroke:#5f7a3a}
+.th9 .mb{fill:#c0905a}.th9 .ms{fill:#a06e3a}.th9 .rb{fill:#8a9a8a}.th9 .hb{fill:#a87a48}.th9 .lb{fill:#d8b878}.th9 .lbs{stroke:#b09050}
+.card.locked{filter:grayscale(1);opacity:.5;cursor:not-allowed}
+.card.locked:hover{transform:none}
+.dot.lockd{opacity:.35;filter:grayscale(1);cursor:not-allowed}
+.vo{fill:#7a5a4a}.pm{fill:#4caf50}.pn{fill:#2e7d4a}
+.th0 .s1{stop-color:#7fd0f2}.th0 .s2{stop-color:#fdf0c8}.th0 .gr{fill:#f4d489}.th0 .p1{fill:#e2b36a}.th0 .p2{fill:#cf9650}.th0 .pl{stroke:#b8803a}.th0 .hl{fill:#eac177}.th0 .m1{fill:#e6935a}.th0 .m2{fill:#d9824a}
+.th1 .s1{stop-color:#8fe3c8}.th1 .s2{stop-color:#fff4c0}.th1 .gr{fill:#8bc34a}.th1 .p1{fill:#b07c48}.th1 .p2{fill:#8f6030}.th1 .pl{stroke:#6f4824}.th1 .hl{fill:#4caf50}
+.th2 .s1{stop-color:#8fd8ff}.th2 .s2{stop-color:#eaf8ff}.th2 .gr{fill:#f7e2a8}.th2 .p1{fill:#e9c77f}.th2 .p2{fill:#d3a95f}.th2 .pl{stroke:#b8873c}.th2 .sea{fill:#3aa7e0}
+.th3 .s1{stop-color:#9fb4c8}.th3 .s2{stop-color:#e6e0d4}.th3 .gr{fill:#b9b2a6}.th3 .p1{fill:#9a948a}.th3 .p2{fill:#7d776d}.th3 .pl{stroke:#666058}.th3 .hl{fill:#a39c90}.th3 .pk{fill:#8d8a86}.th3 .pc{fill:#e8e8e8}
+.th4 .s1{stop-color:#0f1b3d}.th4 .s2{stop-color:#3a4a8a}.th4 .gr{fill:#8a7aa0}.th4 .p1{fill:#6e5e86}.th4 .p2{fill:#58496e}.th4 .pl{stroke:#483c5c}.th4 .hl{fill:#6a5a88}.th4 .m1{fill:#4a3a6a}.th4 .m2{fill:#3a2c58}
+.th5 .s1{stop-color:#5a1a1a}.th5 .s2{stop-color:#ff9a4a}.th5 .gr{fill:#4a3a38}.th5 .p1{fill:#3a2a28}.th5 .p2{fill:#2a1c1a}.th5 .pl{stroke:#1a100f}.th5 .hl{fill:#5a3a34}.th5 .vo{fill:#4a2f2a}
+.th6 .s1{stop-color:#bfe3f5}.th6 .s2{stop-color:#ffffff}.th6 .gr{fill:#f2f8ff}.th6 .p1{fill:#d4e4f2}.th6 .p2{fill:#b8cde0}.th6 .pl{stroke:#98b4cc}.th6 .hl{fill:#dcecf8}.th6 .pk{fill:#a6c8e6}.th6 .pc{fill:#ffffff}.th6 .pn{fill:#4a8a6a}
+.th7 .s1{stop-color:#ffb070}.th7 .s2{stop-color:#ffe9c0}.th7 .gr{fill:#d9915a}.th7 .p1{fill:#c27a45}.th7 .p2{fill:#a5622f}.th7 .pl{stroke:#85501f}.th7 .hl{fill:#c97a47}.th7 .m1{fill:#c9663a}.th7 .m2{fill:#a84f2c}
+.th8 .s1{stop-color:#a7c79a}.th8 .s2{stop-color:#e8efc0}.th8 .gr{fill:#7a9a5a}.th8 .p1{fill:#5a7040}.th8 .p2{fill:#465a30}.th8 .pl{stroke:#34452a}.th8 .hl{fill:#6b8f4a}
+.th9 .s1{stop-color:#6ec6ff}.th9 .s2{stop-color:#fff0c0}.th9 .gr{fill:#8bc34a}.th9 .p1{fill:#b07c48}.th9 .p2{fill:#8f6030}.th9 .pl{stroke:#6f4824}.th9 .sea{fill:#2f8fd0}
+.L0,.L1,.L2,.L3,.L4,.R0,.R1,.R2,.R3,.R4{display:none}
+.cl0 .L0,.cl1 .L1,.cl2 .L2,.cl3 .L3,.cl4 .L4,.cr0 .R0,.cr1 .R1,.cr2 .R2,.cr3 .R3,.cr4 .R4{display:inline}
+.t0 .wl{fill:#bfe3da}.t0 .wn{fill:#8fc9bc}
+.t1 .wl{fill:#fbd9a6}.t1 .wn{fill:#e8a86a}
+.t2 .wl{fill:#d3cdf2}.t2 .wn{fill:#a59ad8}
+.t3 .wl{fill:#f6c9c9}.t3 .wn{fill:#e08a8a}
+.t4 .wl{fill:#c9dcf6}.t4 .wn{fill:#7fa4de}
+.t5 .wl{fill:#e6f2b8}.t5 .wn{fill:#aacb55}
+.t6 .wl{fill:#fff0b8}.t6 .wn{fill:#e0b84c}
+.t7 .wl{fill:#d9f0f0}.t7 .wn{fill:#7cc4c9}
+.t8 .wl{fill:#f3d3ee}.t8 .wn{fill:#c985c0}
+.t9 .wl{fill:#dcdcdc}.t9 .wn{fill:#9aa0a6}
+.a-idle{animation:idle 2.4s ease-in-out infinite}
+.a-walk{animation:walk .32s ease-in-out infinite}
+.a-dig{animation:dig .55s ease-in-out infinite}
+.a-brush{animation:brush .28s ease-in-out infinite}
+.a-drill{animation:drill .12s linear infinite}
+.exarm{transform-origin:120px 84px}
+.exwork{animation:exarm .8s ease-in-out infinite}
+.tw{animation:twinkle 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.po,.pi{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.po{stroke:#2b2118}
+.pi{stroke:#f7ecd2}
+.pf{fill:#f7ecd2;stroke:#2b2118;stroke-width:5;stroke-linejoin:round}
+.detF{fill:#2b2118;stroke:none}
+.detS{fill:none;stroke:#2b2118;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.on.fresh{animation:bonepop .5s ease-out;transform-box:fill-box;transform-origin:center}
+.on .pi.seg{stroke-dasharray:20 6;stroke-linecap:butt}
+.off .po{stroke:rgba(150,128,96,.6);stroke-dasharray:8 8}
+.off .pi{stroke:transparent}
+.off .pf{fill:rgba(255,255,255,.25);stroke:rgba(150,128,96,.6);stroke-dasharray:8 8}
+.off .detF,.off .detS{display:none}
+.skwrap.tada{animation:tada 1s ease-in-out infinite}
+.vb1{animation:vbob 2.2s ease-in-out infinite}
+.vb2{animation:vbob 2.9s ease-in-out infinite .4s}
+.vb3{animation:vbob 1.8s ease-in-out infinite .2s}
+.vwalk{animation:vwalk 28s linear infinite}
+.dirt{position:absolute;width:14px;height:14px;border-radius:50%;background:#8a5a2b;border:3px solid #2b2118;z-index:22;pointer-events:none;animation-duration:.55s;animation-iteration-count:infinite;animation-timing-function:ease-out}
+.dirt1{animation-name:dirt1}
+.dirt2{animation-name:dirt2}
+.dirt3{animation-name:dirt3}
+.conf{position:absolute;top:0;animation:conf 3.2s linear infinite}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes walk{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes dig{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-14px) rotate(-4deg)}60%{transform:translateY(6px) rotate(5deg)}}
+@keyframes brush{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(12px) rotate(5deg)}}
+@keyframes drill{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,3px)}50%{transform:translate(2px,-2px)}75%{transform:translate(-2px,-3px)}}
+@keyframes exarm{0%,100%{transform:rotate(0)}50%{transform:rotate(-20deg)}}
+@keyframes twinkle{0%,100%{opacity:.25;transform:scale(.6)}50%{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,179,0,.8)}70%{box-shadow:0 0 0 18px rgba(255,179,0,0)}}
+@keyframes wig{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes popin{0%{transform:scale(.3)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes bonepop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
+@keyframes burst{0%{transform:scale(.2) rotate(0);opacity:1}100%{transform:scale(1.5) rotate(40deg);opacity:0}}
+@keyframes dirt1{0%{transform:translate(0,0);opacity:1}100%{transform:translate(-44px,-80px);opacity:0}}
+@keyframes dirt2{0%{transform:translate(0,0);opacity:1}100%{transform:translate(0,-96px);opacity:0}}
+@keyframes dirt3{0%{transform:translate(0,0);opacity:1}100%{transform:translate(44px,-80px);opacity:0}}
+@keyframes conf{0%{transform:translateY(-40px) rotate(0)}100%{transform:translateY(780px) rotate(540deg)}}
+@keyframes tada{0%,100%{transform:scale(1)}30%{transform:scale(1.03) rotate(-.6deg)}60%{transform:scale(1.03) rotate(.6deg)}}
+@keyframes vbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes vwalk{0%{transform:translateX(0) scaleX(1)}49%{transform:translateX(520px) scaleX(1)}50%{transform:translateX(520px) scaleX(-1)}99%{transform:translateX(0) scaleX(-1)}100%{transform:translateX(0) scaleX(1)}}
+.hs,.ht,.bt,.gl{display:none}
+.hs-1 .hs1,.hs-2 .hs2,.hs-3 .hs3,.hs-4 .hs4,.ht-1 .ht1,.ht-2 .ht2,.ht-3 .ht3,.ht-4 .ht4,.ht-5 .ht5,.bt-0 .bt0,.bt-1 .bt1,.bt-2 .bt2,.gn-g .gl{display:inline}
+.sw{width:44px;height:44px;border-radius:50%;border:4px solid #2b2118;position:relative;flex:none;transition:transform .12s}
+.sw.sel{transform:scale(1.18);box-shadow:0 0 0 4px #ffd23f,0 0 0 7px #2b2118}
+.opt{height:44px;padding:0 14px;border-radius:22px;border:4px solid #2b2118;background:#fff;font-size:18px;font-weight:700;color:#2b2118;flex:none}
+.opt.sel{background:#ffd23f}
+.gbtn{width:170px;height:56px;border-radius:28px;border:4px solid #2b2118;background:#fff;font-size:26px;font-weight:700;color:#2b2118}
+.gbtn.sel{background:#ffd23f;box-shadow:0 0 0 4px #fff,0 0 0 7px #2b2118}
+.startbtn{position:absolute;left:510px;top:290px;width:260px;height:260px;border-radius:50%;background:#ffd23f;border:8px solid #2b2118;box-shadow:0 10px 0 #2b2118;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:6;animation:startpulse 1.8s ease-in-out infinite}
+.startbtn:active{transform:translateY(6px);box-shadow:0 4px 0 #2b2118}
+.bigbtn{position:absolute;height:80px;border-radius:40px;background:#ffd23f;border:6px solid #2b2118;box-shadow:0 6px 0 #2b2118;font-size:34px;font-weight:700;color:#2b2118;z-index:6}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 #2b2118}
+.sw2{width:84px;height:44px;border-radius:22px;border:4px solid #2b2118;background:#ddd;font-size:18px;font-weight:700;color:#2b2118}
+.sw2.on{background:#6cd36c}
+@keyframes startpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+@media (prefers-reduced-motion: reduce){.g *{animation-duration:.01ms !important;animation-iteration-count:1 !important}}
+</style>
+
+<style>
+html,body{margin:0;height:100%;background:#2b2118;overflow:hidden;touch-action:manipulation;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+#stage{position:absolute;width:1280px;height:720px;transform-origin:0 0}
+</style>
+</head>
+<body>
+<div id="stage"><div id="app" style="width:1280px;height:720px"></div></div>
+<template id="tpl">
+
+<div class="g" style="position:relative;width:1280px;height:720px;overflow:hidden;background:#fdf0c8;user-select:none">
+
+<!-- ===================== LAUNCH ===================== -->
+<sc-if value="{{ isLaunch }}" hint-placeholder-val="{{ false }}">
+<svg width="1280" height="720" viewBox="0 0 1280 720" style="position:absolute;left:0;top:0" aria-hidden="true">
+<defs><linearGradient id="skyL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ec8f2"/><stop offset="1" stop-color="#fdf0c8"/></linearGradient></defs>
+<rect width="1280" height="720" fill="url(#skyL)"/>
+<g stroke="#2b2118" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+<circle cx="1150" cy="280" r="58" fill="#ffd23f"/>
+<path d="M430 130 A24 24 0 0 1 436 84 A36 36 0 0 1 506 72 A32 32 0 0 1 566 92 A26 26 0 0 1 586 130 Z" fill="#fff" transform="translate(-380,170)"/>
+<path d="M430 130 A24 24 0 0 1 436 84 A36 36 0 0 1 506 72 A32 32 0 0 1 566 92 A26 26 0 0 1 586 130 Z" fill="#fff" transform="translate(500,150) scale(.8)"/>
+<path d="M0 560 Q160 470 340 540 Q540 480 760 550 Q980 470 1180 540 Q1240 520 1280 540 V720 H0 Z" fill="#eec677"/>
+<path d="M0 620 Q300 580 640 612 T1280 600 V720 H0 Z" fill="#f4d489"/>
+<g transform="rotate(-18 220 640)"><circle cx="150" cy="634" r="14" fill="#f7ecd2"/><circle cx="150" cy="662" r="14" fill="#f7ecd2"/><circle cx="290" cy="634" r="14" fill="#f7ecd2"/><circle cx="290" cy="662" r="14" fill="#f7ecd2"/><rect x="150" y="634" width="140" height="28" fill="#f7ecd2" stroke="none"/><path d="M150 634 H290 M150 662 H290" fill="none"/></g>
+<path d="M1100 700 V610 Q1100 590 1118 590 Q1136 590 1136 610 V700 Z" fill="#6cc16c"/>
+</g>
+</svg>
+<div style="position:absolute;left:0;top:70px;width:1280px;text-align:center;font-size:90px;font-weight:700;color:#ffd23f;letter-spacing:3px;text-shadow:6px 6px 0 #2b2118,-4px -4px 0 #2b2118,4px -4px 0 #2b2118,-4px 4px 0 #2b2118;z-index:4;line-height:1">DINO-AUSGRABUNG</div>
+<button class="startbtn" aria-label="Spiel starten" onClick="{{ startGame }}">
+<svg viewBox="0 0 120 120" width="170" height="170" aria-hidden="true">
+<g transform="rotate(-35 60 60)" stroke="#2b2118" stroke-width="5" stroke-linejoin="round" fill="#fff">
+<circle cx="22" cy="44" r="15"/><circle cx="22" cy="76" r="15"/><circle cx="98" cy="44" r="15"/><circle cx="98" cy="76" r="15"/>
+<rect x="20" y="46" width="80" height="28" stroke="none"/>
+<path d="M26 46 H94 M26 74 H94" fill="none"/>
+</g>
+</svg>
+<span style="font-size:44px;font-weight:700;color:#2b2118;line-height:1;margin-top:-6px">START</span>
+</button>
+</sc-if>
+
+<!-- ===================== FIGUR-EDITOR ===================== -->
+<sc-if value="{{ isChar }}" hint-placeholder-val="{{ false }}">
+<svg width="1280" height="720" viewBox="0 0 1280 720" style="position:absolute;left:0;top:0" aria-hidden="true">
+<defs><linearGradient id="skyC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe8f8"/><stop offset="1" stop-color="#fdf0c8"/></linearGradient></defs>
+<rect width="1280" height="720" fill="url(#skyC)"/>
+<ellipse cx="260" cy="570" rx="190" ry="34" fill="#f4d489" stroke="#2b2118" stroke-width="5"/>
+<ellipse cx="260" cy="566" rx="140" ry="22" fill="#eec677"/>
+</svg>
+<button class="hud" aria-label="Zurück" onClick="{{ toLaunch }}" style="left:16px">
+<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="#ffd23f" stroke="#2b2118" stroke-width="4"/><path d="M38 18 L24 32 L38 46" fill="none" stroke="#2b2118" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+<div style="position:absolute;left:96px;top:24px;font-size:44px;font-weight:700;color:#2b2118;line-height:1;z-index:5">Deine Figur</div>
+<svg class="{{ av.cls }}" viewBox="0 0 120 170" width="300" height="425" style="position:absolute;left:110px;top:130px;z-index:5" role="img" aria-label="Vorschau deiner Figur">
+<ellipse cx="60" cy="165" rx="34" ry="7" fill="rgba(0,0,0,.25)"/>
+<g class="hs hs1"><path d="M30 40 Q24 90 38 104 L82 104 Q96 90 90 40 Z" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="hs hs2"><path d="M36 46 Q12 54 18 90 Q34 86 42 62 Z" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><path d="M84 46 Q108 54 102 90 Q86 86 78 62 Z" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="hs hs3"><circle cx="60" cy="12" r="12" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="hs hs4"><circle cx="36" cy="28" r="12" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="60" cy="18" r="14" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="84" cy="28" r="12" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="30" cy="46" r="9" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="90" cy="46" r="9" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<rect x="42" y="112" width="14" height="40" rx="6" fill="{{ av.skin }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<rect x="64" y="112" width="14" height="40" rx="6" fill="{{ av.skin }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<rect x="36" y="62" width="48" height="52" rx="14" fill="{{ av.top }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<g class="bt bt0"><path d="M38 100 H82 L80 150 H64 V122 H56 V150 H40 Z" fill="{{ av.bottom }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="bt bt2"><path d="M38 100 H82 L80 134 H64 V122 H56 V134 H40 Z" fill="{{ av.bottom }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="bt bt1"><path d="M34 100 H86 L94 138 H26 Z" fill="{{ av.bottom }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<rect x="36" y="148" width="22" height="16" rx="6" fill="{{ av.shoes }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<rect x="62" y="148" width="22" height="16" rx="6" fill="{{ av.shoes }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M40 74 L22 102" fill="none" stroke="#2b2118" stroke-width="16" stroke-linecap="round"/><path d="M40 74 L22 102" fill="none" stroke="{{ av.skin }}" stroke-width="8" stroke-linecap="round"/>
+<path d="M80 74 L102 96" fill="none" stroke="#2b2118" stroke-width="16" stroke-linecap="round"/><path d="M80 74 L102 96" fill="none" stroke="{{ av.skin }}" stroke-width="8" stroke-linecap="round"/>
+<circle cx="60" cy="44" r="26" fill="{{ av.skin }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M34 38 Q36 14 60 14 Q84 14 86 38 Q74 26 60 28 Q46 26 34 38 Z" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="50" cy="48" r="3.5" fill="#2b2118"/><circle cx="70" cy="48" r="3.5" fill="#2b2118"/>
+<g class="gl"><path d="M45 44 L41 40 M75 44 L79 40" fill="none" stroke="#2b2118" stroke-width="3" stroke-linecap="round"/></g>
+<path d="M50 58 Q60 66 70 58" fill="none" stroke="#2b2118" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="42" cy="56" r="4" fill="#f08a6a" opacity=".8"/><circle cx="78" cy="56" r="4" fill="#f08a6a" opacity=".8"/>
+<g class="ht ht1"><ellipse cx="60" cy="30" rx="42" ry="9" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><path d="M38 30 Q40 6 60 6 Q80 6 82 30 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><rect x="39" y="21" width="42" height="7" fill="#b5582a" stroke="#2b2118" stroke-width="3"/></g>
+<g class="ht ht2"><path d="M36 32 Q38 8 60 8 Q82 8 84 32 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><path d="M58 30 H100 Q104 38 94 38 H58 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="ht ht3"><path d="M34 32 Q36 6 60 6 Q84 6 86 32 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><path d="M30 32 H90" fill="none" stroke="#2b2118" stroke-width="6" stroke-linecap="round"/><path d="M60 6 V26" fill="none" stroke="#2b2118" stroke-width="4"/></g>
+<g class="ht ht4"><path d="M36 32 Q46 6 78 4 Q72 18 84 32 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="78" cy="5" r="7" fill="#fff" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="ht ht5"><path d="M38 30 L38 12 L49 21 L60 8 L71 21 L82 12 L82 30 Z" fill="#ffd23f" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+</svg>
+<div style="position:absolute;left:470px;top:22px;display:flex;gap:14px;z-index:5">
+<button class="gbtn {{ genBCls }}" onClick="{{ genB }}">Junge</button>
+<button class="gbtn {{ genGCls }}" onClick="{{ genG }}">Mädchen</button>
+</div>
+<sc-for list="{{ avRows }}" as="row" hint-placeholder-count="9">
+<div style="position:absolute;left:470px;top:{{ row.top }}px;height:52px;display:flex;align-items:center;gap:10px;z-index:5">
+<div style="width:128px;font-size:22px;font-weight:700;color:#2b2118;flex:none">{{ row.label }}</div>
+<sc-for list="{{ row.items }}" as="op" hint-placeholder-count="6">
+<sc-if value="{{ op.isCol }}" hint-placeholder-val="{{ true }}">
+<button class="sw {{ op.cls }}" aria-label="{{ op.label }}" onClick="{{ op.pick }}" style="background:{{ op.col }}"></button>
+</sc-if>
+<sc-if value="{{ op.isTxt }}" hint-placeholder-val="{{ false }}">
+<button class="opt {{ op.cls }}" onClick="{{ op.pick }}">{{ op.label }}</button>
+</sc-if>
+</sc-for>
+</div>
+</sc-for>
+<button class="bigbtn" onClick="{{ toLevels }}" style="left:110px;top:606px;width:300px">Los geht's!</button>
+</sc-if>
+
+<!-- ===================== BOOTSFAHRT ===================== -->
+<sc-if value="{{ isBoat }}" hint-placeholder-val="{{ false }}">
+<canvas id="boatcv" width="1280" height="720" style="position:absolute;left:0;top:0;width:1280px;height:720px;touch-action:none;z-index:1"></canvas>
+<div style="position:absolute;left:340px;top:26px;width:600px;height:20px;border-radius:10px;background:rgba(255,255,255,.75);border:4px solid #2b2118;z-index:4;pointer-events:none"></div>
+<svg viewBox="0 0 44 44" width="44" height="44" style="position:absolute;left:{{ boat.px }}px;top:14px;z-index:5;pointer-events:none" aria-hidden="true">
+<path d="M4 20 H40 L34 36 H10 Z" fill="#ef4b3c" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+<rect x="16" y="8" width="12" height="12" rx="3" fill="#fff" stroke="#2b2118" stroke-width="3"/>
+</svg>
+<svg viewBox="0 0 44 44" width="40" height="40" style="position:absolute;left:944px;top:16px;z-index:5;pointer-events:none" aria-hidden="true">
+<path d="M4 18 L22 6 L40 18 Z" fill="#ffd23f" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+<rect x="8" y="20" width="6" height="16" fill="#fff" stroke="#2b2118" stroke-width="3"/><rect x="19" y="20" width="6" height="16" fill="#fff" stroke="#2b2118" stroke-width="3"/><rect x="30" y="20" width="6" height="16" fill="#fff" stroke="#2b2118" stroke-width="3"/>
+</svg>
+<sc-if value="{{ boat.hint }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:0;top:380px;width:1280px;text-align:center;z-index:5;pointer-events:none">
+<div style="display:inline-block;padding:12px 28px;border-radius:30px;background:rgba(255,255,255,.88);border:5px solid #2b2118;font-size:30px;font-weight:700;color:#2b2118">Halte links oder rechts, um zu lenken</div>
+</div>
+<svg viewBox="0 0 80 80" width="110" height="110" style="position:absolute;left:60px;top:270px;z-index:5;pointer-events:none;opacity:.85" aria-hidden="true"><circle cx="40" cy="40" r="36" fill="#fff" stroke="#2b2118" stroke-width="5"/><path d="M46 22 L28 40 L46 58" fill="none" stroke="#2b2118" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg viewBox="0 0 80 80" width="110" height="110" style="position:absolute;left:1110px;top:270px;z-index:5;pointer-events:none;opacity:.85" aria-hidden="true"><circle cx="40" cy="40" r="36" fill="#fff" stroke="#2b2118" stroke-width="5"/><path d="M34 22 L52 40 L34 58" fill="none" stroke="#2b2118" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</sc-if>
+<sc-if value="{{ boat.arrived }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:200px;width:1280px;text-align:center;z-index:6;pointer-events:none">
+<div style="display:inline-block;padding:16px 48px;border-radius:44px;background:#ffd23f;border:6px solid #2b2118;font-size:64px;font-weight:700;color:#2b2118;animation:popin .6s ease-out">Angekommen!</div>
+</div>
+</sc-if>
+<button class="cbtn" aria-label="Fahrt überspringen" onClick="{{ skipBoat }}" style="position:absolute;right:16px;top:16px;z-index:7">Überspringen</button>
+</sc-if>
+
+
+<!-- ===================== START-SCREEN ===================== -->
+<sc-if value="{{ isStart }}" hint-placeholder-val="{{ false }}">
+<svg width="1280" height="720" viewBox="0 0 1280 720" style="position:absolute;left:0;top:0" aria-hidden="true">
+<defs>
+<linearGradient id="skyS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd0f2"/><stop offset="1" stop-color="#fdf0c8"/></linearGradient>
+</defs>
+<rect width="1280" height="720" fill="url(#skyS)"/>
+<g stroke="#2b2118" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+<circle cx="1180" cy="60" r="40" fill="#ffd23f"/>
+<path d="M430 130 A24 24 0 0 1 436 84 A36 36 0 0 1 506 72 A32 32 0 0 1 566 92 A26 26 0 0 1 586 130 Z" fill="#fff" transform="translate(-380,-30) scale(.8)"/>
+<path d="M430 130 A24 24 0 0 1 436 84 A36 36 0 0 1 506 72 A32 32 0 0 1 566 92 A26 26 0 0 1 586 130 Z" fill="#fff" transform="translate(760,-20) scale(.7)"/>
+<path d="M0 650 Q300 620 640 645 T1280 640 V720 H0 Z" fill="#f4d489"/>
+</g>
+</svg>
+<div style="position:absolute;left:0;top:10px;width:1280px;text-align:center;font-size:70px;font-weight:700;color:#ffd23f;letter-spacing:2px;text-shadow:4px 4px 0 #2b2118,-3px -3px 0 #2b2118,3px -3px 0 #2b2118,-3px 3px 0 #2b2118;z-index:4">DINO-AUSGRABUNG</div>
+<div style="position:absolute;left:0;top:98px;width:1280px;text-align:center;font-size:30px;font-weight:700;color:#2b2118;z-index:4">Wähle dein Abenteuer!</div>
+<button class="cbtn" aria-label="Figur ändern" onClick="{{ toChar }}" style="position:absolute;left:16px;top:16px;z-index:8">Figur ändern</button>
+<sc-for list="{{ levels }}" as="lv" hint-placeholder-count="10">
+<button class="card {{ lv.cls }}" aria-label="{{ lv.label }}" aria-disabled="{{ lv.dis }}" onClick="{{ lv.go }}" style="left:{{ lv.left }}px;top:{{ lv.top }}px">
+<div class="thumb th{{ lv.i }}">
+<sc-if value="{{ lv.locked }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 60 60" width="54" height="54" aria-hidden="true"><path d="M20 26 V18 Q20 8 30 8 Q40 8 40 18 V26" fill="none" stroke="#2b2118" stroke-width="6" stroke-linecap="round"/><rect x="12" y="26" width="36" height="28" rx="6" fill="#ffd23f" stroke="#2b2118" stroke-width="4"/><circle cx="30" cy="40" r="4" fill="#2b2118"/></svg>
+</sc-if>
+<sc-if value="{{ lv.open }}" hint-placeholder-val="{{ true }}">{{ lv.num }}</sc-if>
+</div>
+<div style="font-size:20px;font-weight:500;margin-top:8px">Level {{ lv.num }}</div>
+<div style="font-size:{{ lv.fs }}px;font-weight:700;line-height:1.15">{{ lv.name }}</div>
+<sc-if value="{{ lv.done }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 100 100" width="34" height="34" style="margin-top:4px" aria-label="Geschafft">
+<path d="M50 6 L62 38 L95 38 L68 58 L79 92 L50 71 L21 92 L32 58 L5 38 L38 38 Z" fill="#ffd23f" stroke="#2b2118" stroke-width="5" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+</button>
+</sc-for>
+</sc-if>
+
+<!-- ===================== AUSGRABUNG ===================== -->
+<sc-if value="{{ isDig }}" hint-placeholder-val="{{ false }}">
+<svg class="{{ thCls }}" width="1280" height="720" viewBox="0 0 1280 720" style="position:absolute;left:0;top:0" aria-hidden="true">
+<defs>
+<linearGradient id="skyD" x1="0" y1="0" x2="0" y2="1"><stop class="s1" offset="0"/><stop class="s2" offset="1"/></linearGradient>
+</defs>
+<rect width="1280" height="720" fill="url(#skyD)"/>
+<g stroke="#2b2118" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+<g class="e e-moon">
+<circle cx="1100" cy="110" r="46" fill="#f6f1c8"/>
+<circle cx="1084" cy="100" r="8" fill="#e0d9a8" stroke="none"/>
+<circle cx="1114" cy="124" r="6" fill="#e0d9a8" stroke="none"/>
+<circle cx="200" cy="60" r="3" fill="#fff" stroke="none"/>
+<circle cx="340" cy="120" r="3" fill="#fff" stroke="none"/>
+<circle cx="470" cy="50" r="3" fill="#fff" stroke="none"/>
+<circle cx="640" cy="90" r="3" fill="#fff" stroke="none"/>
+<circle cx="780" cy="60" r="3" fill="#fff" stroke="none"/>
+<circle cx="900" cy="130" r="3" fill="#fff" stroke="none"/>
+<circle cx="1010" cy="50" r="3" fill="#fff" stroke="none"/>
+<circle cx="120" cy="150" r="3" fill="#fff" stroke="none"/>
+</g>
+<g class="e e-sun">
+<circle cx="170" cy="110" r="50" fill="#ffd23f"/>
+<path d="M170 30 V12 M170 190 V208 M90 110 H72 M250 110 H268 M114 54 L101 41 M226 166 L239 179 M226 54 L239 41 M114 166 L101 179" fill="none"/>
+</g>
+<g class="e e-cloud">
+<path d="M430 130 A24 24 0 0 1 436 84 A36 36 0 0 1 506 72 A32 32 0 0 1 566 92 A26 26 0 0 1 586 130 Z" fill="#fff" transform="translate(300,10)"/>
+<path d="M430 130 A24 24 0 0 1 436 84 A36 36 0 0 1 506 72 A32 32 0 0 1 566 92 A26 26 0 0 1 586 130 Z" fill="#fff" transform="translate(790,30) scale(.8)"/>
+</g>
+<g transform="{{ lay.dyT }}">
+<g class="e e-mesa">
+<path class="m1" d="M0 400 L0 280 L40 270 L70 215 L190 210 L225 275 L300 285 L330 400 Z"/>
+<path class="m2" d="M780 400 L810 300 L870 290 L900 230 L1040 225 L1075 285 L1140 295 L1170 400 Z"/>
+<path class="m1" d="M1190 400 L1210 335 L1280 325 L1280 400 Z"/>
+<path d="M6 330 H300 M8 360 H316 M800 335 H1130 M796 365 H1150" fill="none" stroke="#f4c38b" stroke-width="6" opacity=".6"/>
+</g>
+<g class="e e-peaks">
+<path class="pk" d="M0 400 L90 250 L150 330 L260 190 L360 330 L440 260 L540 400 Z"/>
+<path class="pc" d="M260 190 L232 242 L260 228 L288 244 Z"/>
+<path class="pc" d="M90 250 L70 288 L90 278 L110 292 Z"/>
+<path class="pk" d="M740 400 L850 240 L930 320 L1040 180 L1140 320 L1220 250 L1280 330 V400 Z"/>
+<path class="pc" d="M1040 180 L1010 236 L1040 222 L1070 238 Z"/>
+<path class="pc" d="M850 240 L828 280 L850 270 L872 284 Z"/>
+</g>
+<g class="e e-volcano">
+<path class="vo" d="M440 400 L555 215 Q600 195 645 215 L760 400 Z"/>
+<path d="M565 232 Q600 208 635 232 L620 256 Q600 240 580 256 Z" fill="#ff7a3d"/>
+<path d="M430 150 A24 24 0 0 1 436 104 A36 36 0 0 1 506 92 A32 32 0 0 1 566 112 A26 26 0 0 1 586 150 Z" fill="#c9c9d2" transform="translate(150,-30)"/>
+</g>
+<g class="e e-sea">
+<rect class="sea" x="-4" y="296" width="1288" height="108"/>
+<path d="M0 330 Q40 318 80 330 T160 330 T240 330 T320 330 T400 330 T480 330 T560 330 T640 330 T720 330 T800 330 T880 330 T960 330 T1040 330 T1120 330 T1200 330 T1280 330" fill="none" stroke="#fff" stroke-width="4"/>
+<path d="M0 368 Q40 356 80 368 T160 368 T240 368 T320 368 T400 368 T480 368 T560 368 T640 368 T720 368 T800 368 T880 368 T960 368 T1040 368 T1120 368 T1200 368 T1280 368" fill="none" stroke="#fff" stroke-width="4"/>
+<path d="M980 300 Q1040 250 1100 300 Z" fill="#6cc16c"/>
+<path d="M780 342 H864 L850 364 H794 Z" fill="#e74c3c"/>
+<path d="M822 338 V268" fill="none"/>
+<path d="M822 272 L866 338 H822 Z" fill="#fff"/>
+</g>
+<path class="hl" d="M0 400 Q150 330 330 385 Q520 340 720 395 Q900 345 1080 392 Q1200 360 1280 395 V404 H0 Z"/>
+<path class="gr" d="M0 392 Q200 372 420 390 T820 386 T1280 392 V1300 H0 Z"/>
+<g class="e e-pond">
+<ellipse cx="190" cy="425" rx="100" ry="24" fill="#5fb3d9"/>
+<path d="M130 425 Q150 417 170 425 M200 428 Q220 420 240 428" fill="none" stroke="#fff" stroke-width="3"/>
+</g>
+<g class="e e-boulders">
+<path d="M60 410 L84 380 L130 386 L146 412 Z" fill="#9aa3ad"/>
+<path d="M1150 416 L1172 386 L1222 392 L1236 416 Z" fill="#9aa3ad"/>
+<path d="M900 408 L920 392 L950 396 L956 408 Z" fill="#b0aaa0"/>
+</g>
+<g class="e e-lava">
+<path d="M40 430 Q120 400 200 430 Q120 470 40 430 Z" fill="#ff7a3d"/>
+<path d="M80 430 Q120 418 160 430 Q120 448 80 430 Z" fill="#ffd23f" stroke="none"/>
+<path d="M1060 440 Q1150 410 1240 440 Q1150 480 1060 440 Z" fill="#ff7a3d"/>
+<path d="M1110 440 Q1150 428 1190 440 Q1150 458 1110 440 Z" fill="#ffd23f" stroke="none"/>
+</g>
+</g>
+<g transform="{{ lay.pitT }}">
+<g class="pitE">
+<ellipse class="p1" cx="640" cy="510" rx="580" ry="116" vector-effect="non-scaling-stroke"/>
+<ellipse class="p2" cx="640" cy="520" rx="540" ry="92" stroke="none"/>
+<path class="pl" d="M150 520 Q640 470 1130 520" fill="none" stroke-width="5" vector-effect="non-scaling-stroke"/>
+<path class="pl" d="M200 566 Q640 526 1080 566" fill="none" stroke-width="5" vector-effect="non-scaling-stroke"/>
+<path d="M150 432 L1130 432 L1190 592 L90 592 Z" fill="none" stroke="#fff6d6" stroke-width="3" stroke-dasharray="10 8" vector-effect="non-scaling-stroke"/>
+<rect x="146" y="418" width="9" height="28" fill="#8a5a2b"/>
+<rect x="1126" y="418" width="9" height="28" fill="#8a5a2b"/>
+<rect x="86" y="572" width="9" height="28" fill="#8a5a2b"/>
+<rect x="1186" y="572" width="9" height="28" fill="#8a5a2b"/>
+<circle cx="150" cy="416" r="7" fill="#e74c3c"/>
+<circle cx="1130" cy="416" r="7" fill="#e74c3c"/>
+</g>
+<g class="pitR">
+<rect class="p1" x="60" y="394" width="1160" height="232" rx="26" vector-effect="non-scaling-stroke"/>
+<rect class="p2" x="84" y="412" width="1112" height="196" rx="16" stroke="none"/>
+<path class="pl" d="M84 468 H1196 M84 540 H1196" fill="none" stroke-width="5" vector-effect="non-scaling-stroke"/>
+<rect x="104" y="428" width="1072" height="164" rx="8" fill="none" stroke="#fff6d6" stroke-width="3" stroke-dasharray="10 8" vector-effect="non-scaling-stroke"/>
+<rect x="98" y="420" width="9" height="28" fill="#8a5a2b"/>
+<rect x="1173" y="420" width="9" height="28" fill="#8a5a2b"/>
+<rect x="98" y="574" width="9" height="28" fill="#8a5a2b"/>
+<rect x="1173" y="574" width="9" height="28" fill="#8a5a2b"/>
+<circle cx="102" cy="418" r="7" fill="#e74c3c"/>
+<circle cx="1178" cy="418" r="7" fill="#e74c3c"/>
+</g>
+</g>
+<g transform="{{ lay.dyT }}">
+<g class="e e-tent">
+<path d="M60 398 L135 322 L210 398 Z" fill="#e74c3c"/>
+<path d="M135 322 L112 398 L158 398 Z" fill="#fff"/>
+<path d="M122 398 L135 362 L148 398 Z" fill="#4a2d12"/>
+</g>
+<g class="e e-pines">
+<path d="M60 400 V380 M150 396 V376 M1190 400 V380" fill="none" stroke-width="8"/>
+<path class="pn" d="M30 384 L60 332 L90 384 Z"/>
+<path class="pn" d="M38 358 L60 316 L82 358 Z"/>
+<path class="pn" d="M120 380 L150 328 L180 380 Z"/>
+<path class="pn" d="M128 354 L150 312 L172 354 Z"/>
+<path class="pn" d="M1160 384 L1190 332 L1220 384 Z"/>
+<path class="pn" d="M1168 358 L1190 316 L1212 358 Z"/>
+</g>
+<g class="e e-palmL">
+<path d="M90 398 Q78 336 100 292" fill="none" stroke="#2b2118" stroke-width="22"/>
+<path d="M90 398 Q78 336 100 292" fill="none" stroke="#8a5a2b" stroke-width="14"/>
+<path class="pm" d="M100 292 Q60 252 15 277 Q60 272 100 298 Z"/>
+<path class="pm" d="M100 292 Q140 252 185 277 Q140 274 100 298 Z"/>
+<path class="pm" d="M100 292 Q90 242 120 217 Q120 262 106 294 Z"/>
+<path class="pm" d="M100 292 Q50 302 30 332 Q70 317 102 300 Z"/>
+</g>
+<g class="e e-palmR">
+<path d="M1180 396 Q1192 336 1172 292" fill="none" stroke="#2b2118" stroke-width="22"/>
+<path d="M1180 396 Q1192 336 1172 292" fill="none" stroke="#8a5a2b" stroke-width="14"/>
+<path class="pm" d="M1172 292 Q1132 252 1087 277 Q1132 272 1172 298 Z"/>
+<path class="pm" d="M1172 292 Q1212 252 1257 277 Q1212 274 1172 298 Z"/>
+<path class="pm" d="M1172 292 Q1162 242 1192 217 Q1192 262 1178 294 Z"/>
+<path class="pm" d="M1172 292 Q1122 302 1102 332 Q1142 317 1174 300 Z"/>
+</g>
+<g class="e e-fern">
+<path d="M870 396 Q880 340 860 308 M870 396 Q910 350 930 322 M870 396 Q840 356 820 332" fill="none" stroke="#2e9e4a" stroke-width="12"/>
+</g>
+<g class="e e-cactus">
+<path d="M968 366 H950 V344" fill="none" stroke="#2b2118" stroke-width="22"/>
+<path d="M968 366 H950 V344" fill="none" stroke="#6cc16c" stroke-width="14"/>
+<path d="M966 396 V336 Q966 320 982 320 Q998 320 998 336 V396 Z" fill="#6cc16c"/>
+</g>
+<g class="e e-parasol">
+<path d="M130 404 V332" fill="none"/>
+<path d="M70 340 Q130 280 190 340 Z" fill="#e74c3c"/>
+<path d="M110 326 Q130 296 150 326 L142 342 H118 Z" fill="#fff"/>
+</g>
+</g>
+<g class="e e-snow" stroke="none" fill="#fff">
+<circle cx="120" cy="150" r="5"/><circle cx="260" cy="90" r="4"/><circle cx="380" cy="210" r="5"/><circle cx="520" cy="120" r="4"/>
+<circle cx="660" cy="200" r="5"/><circle cx="790" cy="100" r="4"/><circle cx="930" cy="190" r="5"/><circle cx="1060" cy="110" r="4"/>
+<circle cx="1180" cy="200" r="5"/><circle cx="440" cy="300" r="4"/><circle cx="700" cy="290" r="5"/><circle cx="980" cy="290" r="4"/>
+</g>
+<g transform="{{ lay.sgT }}">
+<path d="M600 396 V372 M680 396 V372" fill="none" stroke="#8a5a2b" stroke-width="8"/>
+<rect x="540" y="320" width="200" height="56" rx="10" fill="#d9a064"/>
+</g>
+</g>
+</svg>
+<div style="position:absolute;left:{{ lay.signLeft }}px;top:{{ lay.signTop }}px;width:200px;height:56px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#2b2118;z-index:3;pointer-events:none">{{ signText }}</div>
+
+<sc-for list="{{ spots }}" as="sp" hint-placeholder-count="6">
+<button class="spot {{ sp.cls }}" aria-label="Hier graben" onClick="{{ sp.go }}" style="left:{{ sp.left }}px;top:{{ sp.top }}px;width:{{ sp.w }}px;height:{{ sp.h }}px">
+<sc-if value="{{ sp.isMound }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 120 84" width="{{ sp.w }}" height="{{ sp.h }}" aria-hidden="true">
+<ellipse cx="60" cy="68" rx="54" ry="12" fill="rgba(0,0,0,.2)"/>
+<path d="M8 68 Q16 18 60 16 Q104 18 112 68 Z" class="mb" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="38" cy="48" r="4" class="ms"/>
+<circle cx="66" cy="36" r="5" class="ms"/>
+<circle cx="86" cy="56" r="4" class="ms"/>
+<g class="dx dx-d"><path d="M24 64 V46 Q24 40 30 40 Q36 40 36 46 V64 Z" fill="#6cc16c" stroke="#2b2118" stroke-width="2.5"/><path d="M36 54 H42 V48" fill="none" stroke="#2b2118" stroke-width="2.5"/></g>
+<g class="dx dx-j"><path d="M18 62 Q14 42 32 36 Q34 54 20 64 Z" fill="#3fa05a" stroke="#2b2118" stroke-width="2.5" stroke-linejoin="round"/><path d="M98 60 Q108 42 90 34 Q86 52 98 62 Z" fill="#4cc06a" stroke="#2b2118" stroke-width="2.5" stroke-linejoin="round"/></g>
+<g class="dx dx-s"><path d="M26 64 Q34 48 44 64 Z" fill="#ffd1dc" stroke="#2b2118" stroke-width="2.5" stroke-linejoin="round"/><path d="M90 48 L93 55 L100 56 L95 61 L96 68 L90 64 L84 68 L85 61 L80 56 L87 55 Z" fill="#ff8a65" stroke="#2b2118" stroke-width="2" stroke-linejoin="round"/></g>
+<g class="dx dx-g"><ellipse cx="28" cy="62" rx="7" ry="4" fill="#cfcac0" stroke="#2b2118" stroke-width="2"/><ellipse cx="94" cy="60" rx="6" ry="4" fill="#bdb8ad" stroke="#2b2118" stroke-width="2"/><ellipse cx="80" cy="66" rx="4" ry="2.5" fill="#cfcac0" stroke="#2b2118" stroke-width="2"/></g>
+<g class="dx dx-n"><path d="M26 64 L33 36 L40 64 Z" fill="#7fe8ff" stroke="#2b2118" stroke-width="2.5" stroke-linejoin="round"/><path d="M82 64 L91 30 L99 64 Z" fill="#a8f2ff" stroke="#2b2118" stroke-width="2.5" stroke-linejoin="round"/></g>
+<g class="dx dx-v"><path d="M24 62 L42 44 L54 54 L74 32 L96 48" fill="none" stroke="#ff7a3d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g class="dx dx-i"><path d="M14 44 Q60 4 106 44 Q90 34 76 42 Q60 28 44 42 Q28 34 14 44 Z" fill="#fff" stroke="#2b2118" stroke-width="2.5" stroke-linejoin="round"/><path d="M34 60 V72 L38 60 M84 62 V70 L88 62" fill="none" stroke="#bfe3f5" stroke-width="3" stroke-linecap="round"/></g>
+<g class="dx dx-c"><path d="M14 58 Q60 44 106 58" fill="none" stroke="#8a3f20" stroke-width="4" stroke-linecap="round"/><path d="M22 44 Q60 30 98 44" fill="none" stroke="#8a3f20" stroke-width="4" stroke-linecap="round"/></g>
+<g class="dx dx-m"><path d="M22 66 V40 M29 66 V46 M96 66 V42" fill="none" stroke="#3e6a2a" stroke-width="3" stroke-linecap="round"/><circle cx="48" cy="60" r="5" fill="#cfe8a8" stroke="#2b2118" stroke-width="2"/><circle cx="74" cy="64" r="4" fill="#cfe8a8" stroke="#2b2118" stroke-width="2"/></g>
+<g class="dx dx-p"><path d="M30 64 V48" fill="none" stroke="#2e7d4a" stroke-width="3"/><circle cx="30" cy="44" r="7" fill="#ff5a7a" stroke="#2b2118" stroke-width="2.5"/><circle cx="30" cy="44" r="2.5" fill="#ffd23f"/><path d="M92 66 L96 52 L100 66" fill="none" stroke="#2e9e4a" stroke-width="3"/></g>
+
+<path class="tw" d="M88 8 L91 19 L102 22 L91 25 L88 36 L85 25 L74 22 L85 19 Z" fill="#fff" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ sp.isRock }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 120 84" width="{{ sp.w }}" height="{{ sp.h }}" aria-hidden="true">
+<ellipse cx="60" cy="70" rx="54" ry="12" fill="rgba(0,0,0,.2)"/>
+<path d="M12 70 Q10 34 38 26 Q70 18 96 32 Q114 44 108 70 Z" class="rb" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M50 28 L58 46 L50 60 M82 34 L72 50 L82 64" fill="none" stroke="#2b2118" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M28 46 Q38 36 54 34" fill="none" stroke="#cfd6dc" stroke-width="4" stroke-linecap="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ sp.isHuge }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 120 84" width="{{ sp.w }}" height="{{ sp.h }}" aria-hidden="true">
+<ellipse cx="60" cy="70" rx="56" ry="12" fill="rgba(0,0,0,.2)"/>
+<path d="M4 70 Q10 14 60 10 Q110 14 116 70 Z" class="hb" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M20 60 L32 42 L46 56 Z" class="rb" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+<path d="M76 50 L90 36 L102 58 Z" class="rb" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+<path d="M60 44 V18" fill="none" stroke="#2b2118" stroke-width="3" stroke-linecap="round"/>
+<path d="M60 18 H86 L78 26 L86 34 H60 Z" fill="#ffd23f" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ sp.isLayer }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 120 84" width="{{ sp.w }}" height="{{ sp.h }}" aria-hidden="true">
+<ellipse cx="60" cy="68" rx="54" ry="12" fill="rgba(0,0,0,.2)"/>
+<path d="M10 68 Q20 38 60 36 Q100 38 110 68 Z" class="lb" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M30 54 Q45 46 60 52 Q76 46 92 54" fill="none" class="lbs" stroke-width="3" stroke-linecap="round"/>
+<circle cx="44" cy="38" r="8" fill="#f7ecd2" stroke="#2b2118" stroke-width="3"/>
+<circle cx="76" cy="35" r="8" fill="#f7ecd2" stroke="#2b2118" stroke-width="3"/>
+<path class="tw" d="M96 12 L99 23 L110 26 L99 29 L96 40 L93 29 L82 26 L93 23 Z" fill="#fff" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ sp.isLocked }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 120 84" width="{{ sp.w }}" height="{{ sp.h }}" aria-hidden="true">
+<ellipse cx="60" cy="68" rx="54" ry="12" fill="rgba(0,0,0,.2)"/>
+<path d="M8 68 Q16 26 60 24 Q104 26 112 68 Z" fill="#8f98a3" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M30 62 Q40 40 60 38 Q80 40 90 62" fill="none" stroke="#6d7580" stroke-width="3"/>
+<path d="M52 38 V32 Q52 22 60 22 Q68 22 68 32 V38" fill="none" stroke="#2b2118" stroke-width="4" stroke-linecap="round"/>
+<rect x="46" y="36" width="28" height="22" rx="5" fill="#ffd23f" stroke="#2b2118" stroke-width="3"/>
+<circle cx="60" cy="47" r="3" fill="#2b2118"/>
+</svg>
+</sc-if>
+<sc-if value="{{ sp.isDone }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 120 84" width="{{ sp.w }}" height="{{ sp.h }}" aria-hidden="true">
+<ellipse cx="60" cy="56" rx="50" ry="20" class="p1" stroke="#2b2118" stroke-width="4"/>
+<ellipse cx="60" cy="58" rx="38" ry="13" fill="#4a2d12"/>
+<path d="M92 68 Q100 44 112 66 Z" class="mb" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+</button>
+</sc-for>
+
+<sc-if value="{{ hasDirt }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ dirt }}" as="d" hint-placeholder-count="6">
+<div class="dirt dirt{{ d.k }}" style="left:{{ d.left }}px;top:{{ d.top }}px;animation-delay:{{ d.dl }}s"></div>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{ hasBurst }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:{{ burst.x }}px;top:{{ burst.y }}px;width:150px;height:150px;margin:-100px 0 0 -75px;pointer-events:none;z-index:25;animation:burst .9s ease-out forwards">
+<sc-if value="{{ burstBone }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 100 100" width="150" height="150" aria-hidden="true">
+<path d="M50 4 L61 36 L95 36 L67 56 L78 90 L50 69 L22 90 L33 56 L5 36 L39 36 Z" fill="#ffd23f" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ burstJunk }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 100 100" width="150" height="150" aria-hidden="true">
+<path d="M32 14 H58 V50 L82 58 Q92 62 90 78 H24 Q20 78 20 72 L24 30 Z" fill="#8a5a2b" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M22 70 H90" fill="none" stroke="#2b2118" stroke-width="4"/>
+<path d="M36 28 H54 M36 38 H54" fill="none" stroke="#f7ecd2" stroke-width="3" stroke-linecap="round"/>
+</svg>
+</sc-if>
+</div>
+</sc-if>
+
+<button class="nav" aria-label="Zum Museum" onClick="{{ goMuseum }}" style="left:1160px;top:480px">
+<svg viewBox="0 0 100 100" width="100" height="100" aria-hidden="true">
+<circle cx="50" cy="50" r="46" fill="#ffd23f" stroke="#2b2118" stroke-width="5"/>
+<path d="M28 44 L50 26 L72 44 Z" fill="#fff" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<rect x="33" y="46" width="8" height="16" fill="#fff" stroke="#2b2118" stroke-width="3"/>
+<rect x="46" y="46" width="8" height="16" fill="#fff" stroke="#2b2118" stroke-width="3"/>
+<rect x="59" y="46" width="8" height="16" fill="#fff" stroke="#2b2118" stroke-width="3"/>
+<path d="M30 78 H70 M60 70 L70 78 L60 86" fill="none" stroke="#2b2118" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</button>
+</sc-if>
+
+<!-- ===================== MUSEUM ===================== -->
+<sc-if value="{{ isMuseum }}" hint-placeholder-val="{{ false }}">
+<svg class="{{ rm.cls }}" width="1280" height="720" viewBox="0 0 1280 720" style="position:absolute;left:0;top:0" aria-hidden="true">
+<defs>
+<pattern id="chk" width="120" height="120" patternUnits="userSpaceOnUse"><rect width="120" height="120" fill="#e9c9a0"/><rect width="60" height="60" fill="#d9a877"/><rect x="60" y="60" width="60" height="60" fill="#d9a877"/></pattern>
+</defs>
+<g stroke="#2b2118" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+<rect class="wl" width="1280" height="490" stroke="none"/>
+<rect class="wn" x="-4" y="330" width="1288" height="146"/>
+<rect x="-4" y="476" width="1288" height="14" fill="#6a4a2e"/>
+<rect x="0" y="490" width="1280" height="230" fill="url(#chk)" stroke="none"/>
+<path d="M0 490 H1280" fill="none"/>
+<path d="M70 300 V190 A60 60 0 0 1 190 190 V300 Z" fill="#9ad8f4" stroke-width="5"/>
+<path d="M130 130 V300 M70 226 H190" fill="none"/>
+<rect x="58" y="300" width="144" height="14" fill="#e5b84a"/>
+<path d="M1090 300 V190 A60 60 0 0 1 1210 190 V300 Z" fill="#9ad8f4" stroke-width="5"/>
+<path d="M1150 130 V300 M1090 226 H1210" fill="none"/>
+<rect x="1078" y="300" width="144" height="14" fill="#e5b84a"/>
+<path d="M410 12 V0 M870 12 V0" fill="none"/>
+<rect x="224" y="494" width="832" height="44" rx="12" fill="#8a5a2b"/>
+<rect x="224" y="494" width="832" height="14" rx="7" fill="#b57d44"/>
+<rect x="84" y="352" width="130" height="118" rx="8" fill="rgba(255,255,255,.4)"/>
+<rect x="74" y="456" width="150" height="26" rx="6" fill="#8a5a2b"/>
+<rect x="1066" y="352" width="130" height="118" rx="8" fill="rgba(255,255,255,.4)"/>
+<rect x="1056" y="456" width="150" height="26" rx="6" fill="#8a5a2b"/>
+<g class="L0">
+<circle cx="149" cy="412" r="32" fill="#e8c58a"/>
+<circle cx="149" cy="412" r="20" fill="none"/>
+<circle cx="149" cy="412" r="8" fill="none"/>
+</g>
+<g class="L1">
+<ellipse cx="149" cy="430" rx="22" ry="18" fill="#c9a06a"/>
+<path d="M149 418 L132 388 M149 418 L149 378 M149 418 L166 388" fill="none" stroke-width="12"/>
+<path d="M149 418 L132 388 M149 418 L149 378 M149 418 L166 388" fill="none" stroke="#c9a06a" stroke-width="6"/>
+</g>
+<g class="L2">
+<path d="M130 450 L149 380 L168 450 Z" fill="#f7ecd2"/>
+</g>
+<g class="L3">
+<path d="M149 450 Q108 420 149 380 Q190 420 149 450 Z" fill="#f5a9c0"/>
+<path d="M149 446 V386 M149 440 L128 410 M149 440 L170 410" fill="none" stroke-width="3"/>
+</g>
+<g class="L4">
+<path d="M149 378 L172 408 L160 450 L138 450 L126 408 Z" fill="#9ad8f4"/>
+<path d="M149 378 V450 M126 408 L172 408" fill="none" stroke-width="3"/>
+</g>
+<g class="R0">
+<ellipse cx="1131" cy="414" rx="28" ry="36" fill="#f6ecd6"/>
+<path d="M1118 400 L1126 408 M1140 392 L1144 402 M1136 424 L1146 430" fill="none" stroke-width="3"/>
+</g>
+<g class="R1">
+<path d="M1131 450 Q1090 410 1131 372 Q1172 410 1131 450 Z" fill="#6cc16c"/>
+<path d="M1131 446 V382 M1131 420 L1112 406 M1131 408 L1150 394" fill="none" stroke-width="3"/>
+</g>
+<g class="R2">
+<ellipse cx="1126" cy="412" rx="36" ry="20" fill="#9ad0e8"/>
+<path d="M1160 412 L1190 392 L1190 432 Z" fill="#9ad0e8"/>
+<circle cx="1108" cy="406" r="4" fill="#2b2118"/>
+<path d="M1112 424 Q1126 430 1140 424" fill="none" stroke-width="3"/>
+</g>
+<g class="R3">
+<path d="M1131 450 Q1090 400 1140 372 Q1170 420 1131 450 Z" fill="#f0b8d8"/>
+<path d="M1131 450 L1138 376" fill="none" stroke-width="3"/>
+</g>
+<g class="R4">
+<rect x="1100" y="404" width="62" height="16" rx="6" fill="#f7ecd2"/>
+<circle cx="1100" cy="402" r="10" fill="#f7ecd2"/>
+<circle cx="1100" cy="422" r="10" fill="#f7ecd2"/>
+<circle cx="1162" cy="402" r="10" fill="#f7ecd2"/>
+<circle cx="1162" cy="422" r="10" fill="#f7ecd2"/>
+</g>
+</g>
+</svg>
+<div style="position:absolute;left:360px;top:12px;width:560px;height:62px;border-radius:14px;background:#ffd23f;border:5px solid #2b2118;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#2b2118;z-index:3">{{ rm.title }}</div>
+
+<div class="skwrap {{ skCls }}" style="position:absolute;left:272px;top:82px;width:736px;height:460px;z-index:4">
+<sc-for list="{{ skParts }}" as="pt" hint-placeholder-count="6">
+<svg width="736" height="460" viewBox="0 0 640 400" style="position:absolute;left:0;top:0;pointer-events:none" aria-hidden="true">
+<g class="{{ pt.cls }}">
+<path class="pf" d="{{ pt.f }}"/>
+<path class="po" d="{{ pt.s }}" stroke-width="{{ pt.w }}"/>
+<path class="pi {{ pt.seg }}" d="{{ pt.s }}" stroke-width="{{ pt.wi }}"/>
+<path class="po" d="{{ pt.t }}" stroke-width="{{ pt.tw }}"/>
+<path class="pi" d="{{ pt.t }}" stroke-width="{{ pt.twi }}"/>
+<path class="detF" d="{{ pt.dF }}"/>
+<path class="detS" d="{{ pt.dS }}"/>
+</g>
+</svg>
+</sc-for>
+<sc-for list="{{ slots }}" as="sl" hint-placeholder-count="6">
+<button class="slot {{ sl.cls }}" aria-label="Knochen anbringen" onClick="{{ sl.place }}" style="left:{{ sl.left }}px;top:{{ sl.top }}px"></button>
+</sc-for>
+</div>
+
+<sc-for list="{{ visitors }}" as="v" hint-placeholder-count="4">
+<div class="{{ v.wrapCls }}" style="position:absolute;left:{{ v.left }}px;top:{{ v.top }}px;width:{{ v.w }}px;pointer-events:none;z-index:{{ v.z }}">
+<svg class="{{ v.bob }}" viewBox="0 0 100 170" width="{{ v.w }}" height="{{ v.h }}" aria-hidden="true">
+<ellipse cx="50" cy="165" rx="30" ry="6" fill="rgba(0,0,0,.2)"/>
+<rect x="32" y="108" width="14" height="48" rx="6" fill="{{ v.pants }}" stroke="#2b2118" stroke-width="4"/>
+<rect x="54" y="108" width="14" height="48" rx="6" fill="{{ v.pants }}" stroke="#2b2118" stroke-width="4"/>
+<rect x="28" y="152" width="22" height="12" rx="5" fill="#3b2a1d" stroke="#2b2118" stroke-width="4"/>
+<rect x="50" y="152" width="22" height="12" rx="5" fill="#3b2a1d" stroke="#2b2118" stroke-width="4"/>
+<path d="M26 68 L12 108 M74 68 L88 108" fill="none" stroke="#2b2118" stroke-width="16" stroke-linecap="round"/>
+<path d="M26 68 L12 108 M74 68 L88 108" fill="none" stroke="{{ v.shirt }}" stroke-width="8" stroke-linecap="round"/>
+<rect x="24" y="58" width="52" height="58" rx="16" fill="{{ v.shirt }}" stroke="#2b2118" stroke-width="4"/>
+<circle cx="50" cy="38" r="24" fill="{{ v.skin }}" stroke="#2b2118" stroke-width="4"/>
+<path d="M26 36 Q28 8 50 8 Q72 8 74 36 Q62 22 50 24 Q38 22 26 36 Z" fill="{{ v.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="42" cy="42" r="3" fill="#2b2118"/>
+<circle cx="58" cy="42" r="3" fill="#2b2118"/>
+<path d="M42 52 Q50 58 58 52" fill="none" stroke="#2b2118" stroke-width="3" stroke-linecap="round"/>
+</svg>
+</div>
+</sc-for>
+
+<sc-if value="{{ hasPrev }}" hint-placeholder-val="{{ false }}">
+<button class="nav" aria-label="Zum vorigen Saal" onClick="{{ goPrev }}" style="left:24px;top:480px">
+<svg viewBox="0 0 100 100" width="100" height="100" aria-hidden="true">
+<circle cx="50" cy="50" r="46" fill="#ffd23f" stroke="#2b2118" stroke-width="5"/>
+<path d="M36 60 V38 Q36 26 50 26 Q64 26 64 38 V60 Z" fill="#8a5a2b" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="58" cy="48" r="3" fill="#ffd23f"/>
+<path d="M70 78 H30 M40 70 L30 78 L40 86" fill="none" stroke="#2b2118" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</button>
+</sc-if>
+<sc-if value="{{ hasNext }}" hint-placeholder-val="{{ false }}">
+<button class="nav" aria-label="Zum nächsten Saal" onClick="{{ goNext }}" style="left:1156px;top:480px">
+<svg viewBox="0 0 100 100" width="100" height="100" aria-hidden="true">
+<circle cx="50" cy="50" r="46" fill="#ffd23f" stroke="#2b2118" stroke-width="5"/>
+<path d="M36 60 V38 Q36 26 50 26 Q64 26 64 38 V60 Z" fill="#8a5a2b" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="42" cy="48" r="3" fill="#ffd23f"/>
+<path d="M30 78 H70 M60 70 L70 78 L60 86" fill="none" stroke="#2b2118" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</button>
+</sc-if>
+<button class="hud" aria-label="Zur Ausgrabung" onClick="{{ goDig }}" style="left:92px">
+<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+<circle cx="32" cy="32" r="29" fill="#ffd23f" stroke="#2b2118" stroke-width="4"/>
+<path d="M14 44 Q32 16 50 44 Z" fill="#b9803f" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+<path d="M44 14 L38 38" fill="none" stroke="#2b2118" stroke-width="4" stroke-linecap="round"/>
+</svg>
+</button>
+<sc-for list="{{ dots }}" as="dt" hint-placeholder-count="10">
+<button class="dot {{ dt.cls }}" aria-label="Saal wählen" onClick="{{ dt.go }}" style="left:{{ dt.left }}px">{{ dt.n }}</button>
+</sc-for>
+</sc-if>
+
+<!-- ===================== FIGUR ===================== -->
+<sc-if value="{{ inGame }}" hint-placeholder-val="{{ false }}">
+<div class="{{ ch.exCls }}" style="position:absolute;left:{{ ch.exX }}px;top:{{ ch.y }}px;width:220px;height:150px;margin-left:-110px;margin-top:-148px;transition:left {{ ch.dur }}s linear, top {{ ch.dur }}s linear;z-index:19;pointer-events:none">
+<svg viewBox="0 0 220 150" width="220" height="150" style="transform:scaleX({{ ch.face }})" aria-hidden="true">
+<rect x="28" y="116" width="120" height="30" rx="15" fill="#3a3a3a" stroke="#2b2118" stroke-width="4"/>
+<circle cx="52" cy="131" r="9" fill="#777" stroke="#2b2118" stroke-width="3"/>
+<circle cx="124" cy="131" r="9" fill="#777" stroke="#2b2118" stroke-width="3"/>
+<rect x="34" y="64" width="22" height="48" rx="6" fill="#e0a800" stroke="#2b2118" stroke-width="4"/>
+<rect x="50" y="62" width="78" height="54" rx="10" fill="#ffd23f" stroke="#2b2118" stroke-width="4"/>
+<rect x="86" y="70" width="34" height="28" rx="5" fill="#bfe3ff" stroke="#2b2118" stroke-width="3"/>
+<g class="exarm {{ ch.exAnim }}">
+<path d="M120 84 L176 40 L204 92" fill="none" stroke="#2b2118" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M120 84 L176 40 L204 92" fill="none" stroke="#ffd23f" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M200 90 L218 80 L216 116 L190 116 Z" fill="#b8c4cc" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+</g>
+</svg>
+</div>
+<div style="position:absolute;left:{{ ch.x }}px;top:{{ ch.y }}px;width:120px;height:170px;margin-left:-60px;margin-top:-168px;transition:left {{ ch.dur }}s linear, top {{ ch.dur }}s linear;z-index:20;pointer-events:none">
+<div class="{{ ch.anim }}" style="width:120px;height:170px">
+<svg class="{{ av.cls }}" viewBox="0 0 120 170" width="120" height="170" style="transform:scaleX({{ ch.face }})" role="img" aria-label="Ausgräber-Figur">
+<ellipse cx="60" cy="165" rx="34" ry="7" fill="rgba(0,0,0,.25)"/>
+<g class="hs hs1"><path d="M30 40 Q24 90 38 104 L82 104 Q96 90 90 40 Z" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="hs hs2"><path d="M36 46 Q12 54 18 90 Q34 86 42 62 Z" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><path d="M84 46 Q108 54 102 90 Q86 86 78 62 Z" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="hs hs3"><circle cx="60" cy="12" r="12" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="hs hs4"><circle cx="36" cy="28" r="12" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="60" cy="18" r="14" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="84" cy="28" r="12" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="30" cy="46" r="9" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="90" cy="46" r="9" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<rect x="42" y="112" width="14" height="40" rx="6" fill="{{ av.skin }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<rect x="64" y="112" width="14" height="40" rx="6" fill="{{ av.skin }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<rect x="36" y="62" width="48" height="52" rx="14" fill="{{ av.top }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<g class="bt bt0"><path d="M38 100 H82 L80 150 H64 V122 H56 V150 H40 Z" fill="{{ av.bottom }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="bt bt2"><path d="M38 100 H82 L80 134 H64 V122 H56 V134 H40 Z" fill="{{ av.bottom }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="bt bt1"><path d="M34 100 H86 L94 138 H26 Z" fill="{{ av.bottom }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<rect x="36" y="148" width="22" height="16" rx="6" fill="{{ av.shoes }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<rect x="62" y="148" width="22" height="16" rx="6" fill="{{ av.shoes }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M40 74 L22 102" fill="none" stroke="#2b2118" stroke-width="16" stroke-linecap="round"/><path d="M40 74 L22 102" fill="none" stroke="{{ av.skin }}" stroke-width="8" stroke-linecap="round"/>
+<g class="{{ ch.shCls }}">
+<path d="M102 38 L108 150" fill="none" stroke="#2b2118" stroke-width="10" stroke-linecap="round"/>
+<path d="M102 38 L108 150" fill="none" stroke="#a8702f" stroke-width="4" stroke-linecap="round"/>
+<path d="M98 146 L118 146 L114 166 Q108 172 102 166 Z" fill="#b8c4cc" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+</g>
+<g class="{{ ch.brCls }}">
+<path d="M101 56 L104 100" fill="none" stroke="#2b2118" stroke-width="10" stroke-linecap="round"/>
+<path d="M101 56 L104 100" fill="none" stroke="#a8702f" stroke-width="4" stroke-linecap="round"/>
+<rect x="94" y="98" width="20" height="10" fill="#b8c4cc" stroke="#2b2118" stroke-width="4"/>
+<path d="M94 108 L114 108 L118 138 L90 138 Z" fill="#e5b84a" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M100 114 V134 M104 114 V134 M108 114 V134" fill="none" stroke="#2b2118" stroke-width="2"/>
+</g>
+<g class="{{ ch.drCls }}">
+<path d="M92 56 H114" fill="none" stroke="#2b2118" stroke-width="12" stroke-linecap="round"/>
+<path d="M92 56 H114" fill="none" stroke="#8a8a8a" stroke-width="5" stroke-linecap="round"/>
+<rect x="94" y="62" width="18" height="46" rx="6" fill="#ff9800" stroke="#2b2118" stroke-width="4"/>
+<path d="M103 108 V142" fill="none" stroke="#2b2118" stroke-width="9" stroke-linecap="round"/>
+<path d="M103 108 V142" fill="none" stroke="#bbb" stroke-width="4" stroke-linecap="round"/>
+<path d="M98 142 L103 154 L108 142 Z" fill="#555" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+</g>
+
+<path d="M80 74 L102 96" fill="none" stroke="#2b2118" stroke-width="16" stroke-linecap="round"/><path d="M80 74 L102 96" fill="none" stroke="{{ av.skin }}" stroke-width="8" stroke-linecap="round"/>
+<circle cx="60" cy="44" r="26" fill="{{ av.skin }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M34 38 Q36 14 60 14 Q84 14 86 38 Q74 26 60 28 Q46 26 34 38 Z" fill="{{ av.hair }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="50" cy="48" r="3.5" fill="#2b2118"/><circle cx="70" cy="48" r="3.5" fill="#2b2118"/>
+<g class="gl"><path d="M45 44 L41 40 M75 44 L79 40" fill="none" stroke="#2b2118" stroke-width="3" stroke-linecap="round"/></g>
+<path d="M50 58 Q60 66 70 58" fill="none" stroke="#2b2118" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="42" cy="56" r="4" fill="#f08a6a" opacity=".8"/><circle cx="78" cy="56" r="4" fill="#f08a6a" opacity=".8"/>
+<g class="ht ht1"><ellipse cx="60" cy="30" rx="42" ry="9" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><path d="M38 30 Q40 6 60 6 Q80 6 82 30 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><rect x="39" y="21" width="42" height="7" fill="#b5582a" stroke="#2b2118" stroke-width="3"/></g>
+<g class="ht ht2"><path d="M36 32 Q38 8 60 8 Q82 8 84 32 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><path d="M58 30 H100 Q104 38 94 38 H58 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="ht ht3"><path d="M34 32 Q36 6 60 6 Q84 6 86 32 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><path d="M30 32 H90" fill="none" stroke="#2b2118" stroke-width="6" stroke-linecap="round"/><path d="M60 6 V26" fill="none" stroke="#2b2118" stroke-width="4"/></g>
+<g class="ht ht4"><path d="M36 32 Q46 6 78 4 Q72 18 84 32 Z" fill="{{ av.hatC }}" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/><circle cx="78" cy="5" r="7" fill="#fff" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+<g class="ht ht5"><path d="M38 30 L38 12 L49 21 L60 8 L71 21 L82 12 L82 30 Z" fill="#ffd23f" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/></g>
+</svg>
+</div>
+</div>
+
+<!-- ===================== INVENTAR UND WERKZEUGE ===================== -->
+<div style="position:absolute;left:0;bottom:0;width:1280px;height:110px;background:#8a5a2b;border-top:6px solid #2b2118;box-sizing:border-box;z-index:30"></div>
+<svg viewBox="0 0 80 80" width="76" height="76" style="position:absolute;left:28px;top:628px;z-index:31" aria-hidden="true">
+<rect x="14" y="20" width="52" height="54" rx="16" fill="#e74c3c" stroke="#2b2118" stroke-width="4"/>
+<path d="M26 20 Q26 6 40 6 Q54 6 54 20" fill="none" stroke="#2b2118" stroke-width="5" stroke-linecap="round"/>
+<rect x="24" y="44" width="32" height="20" rx="6" fill="#ff7a6b" stroke="#2b2118" stroke-width="4"/>
+</svg>
+<sc-for list="{{ inv }}" as="it" hint-placeholder-count="6">
+<button class="inv {{ it.cls }}" aria-label="Knochen" onClick="{{ it.pick }}" style="left:{{ it.left }}px">
+<sc-if value="{{ it.isSkull }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<path d="M10 50 C10 28 34 18 58 22 C82 26 94 40 91 56 L22 64 C14 62 10 56 10 50 Z" fill="#f7ecd2" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M22 64 L91 56 L85 78 C66 90 38 88 28 76 Z" fill="#f7ecd2" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="38" cy="40" r="7" fill="#2b2118"/>
+<path d="M46 63 L50 72 L54 62 M62 60 L66 70 L70 58 M76 58 L79 67 L82 57" fill="none" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ it.isSpine }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<path d="M10 72 Q50 14 90 52" fill="none" stroke="#2b2118" stroke-width="24" stroke-linecap="round"/>
+<path d="M10 72 Q50 14 90 52" fill="none" stroke="#f7ecd2" stroke-width="16" stroke-dasharray="14 5"/>
+</svg>
+</sc-if>
+<sc-if value="{{ it.isRibs }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<path d="M25 20 Q10 55 30 85 M50 18 Q36 55 56 88 M75 20 Q66 55 84 82" fill="none" stroke="#2b2118" stroke-width="16" stroke-linecap="round"/>
+<path d="M25 20 Q10 55 30 85 M50 18 Q36 55 56 88 M75 20 Q66 55 84 82" fill="none" stroke="#f7ecd2" stroke-width="8" stroke-linecap="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ it.isTail }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<path d="M8 28 Q50 34 92 82 Q48 70 8 58 Z" fill="#f7ecd2" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M24 33 L24 57 M40 38 L40 63 M58 48 L58 68 M74 62 L74 74" fill="none" stroke="#2b2118" stroke-width="3" stroke-linecap="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ it.isLegs }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<path d="M34 14 Q62 46 46 78" fill="none" stroke="#2b2118" stroke-width="22" stroke-linecap="round"/>
+<path d="M34 14 Q62 46 46 78" fill="none" stroke="#f7ecd2" stroke-width="14" stroke-linecap="round"/>
+<path d="M46 78 L80 86" fill="none" stroke="#2b2118" stroke-width="18" stroke-linecap="round"/>
+<path d="M46 78 L80 86" fill="none" stroke="#f7ecd2" stroke-width="10" stroke-linecap="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ it.isArm }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<path d="M28 18 Q62 36 52 66" fill="none" stroke="#2b2118" stroke-width="16" stroke-linecap="round"/>
+<path d="M28 18 Q62 36 52 66" fill="none" stroke="#f7ecd2" stroke-width="9" stroke-linecap="round"/>
+<path d="M52 66 L40 82 M52 66 L56 86 M52 66 L70 78" fill="none" stroke="#2b2118" stroke-width="5" stroke-linecap="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ it.done }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 30 30" width="30" height="30" style="position:absolute;right:-12px;top:-12px" aria-hidden="true">
+<circle cx="15" cy="15" r="13" fill="#3fb950" stroke="#2b2118" stroke-width="3"/>
+<path d="M8 15 L13 20 L22 10" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+</button>
+</sc-for>
+
+<sc-if value="{{ isDig }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ tools }}" as="tl" hint-placeholder-count="4">
+<button class="tool {{ tl.cls }}" aria-label="{{ tl.label }}" onClick="{{ tl.pick }}" style="left:{{ tl.left }}px">
+<sc-if value="{{ tl.isShovel }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<path d="M50 12 V60" fill="none" stroke="#2b2118" stroke-width="12" stroke-linecap="round"/>
+<path d="M50 12 V60" fill="none" stroke="#a8702f" stroke-width="6" stroke-linecap="round"/>
+<path d="M38 12 H62" fill="none" stroke="#2b2118" stroke-width="10" stroke-linecap="round"/>
+<path d="M34 58 H66 L62 90 Q50 100 38 90 Z" fill="#b8c4cc" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ tl.isBrush }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<path d="M50 8 V50" fill="none" stroke="#2b2118" stroke-width="14" stroke-linecap="round"/>
+<path d="M50 8 V50" fill="none" stroke="#a8702f" stroke-width="8" stroke-linecap="round"/>
+<rect x="40" y="48" width="20" height="14" fill="#b8c4cc" stroke="#2b2118" stroke-width="4"/>
+<path d="M38 62 H62 L68 94 H32 Z" fill="#e5b84a" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<path d="M44 68 V90 M50 68 V90 M56 68 V90" fill="none" stroke="#2b2118" stroke-width="2.5"/>
+</svg>
+</sc-if>
+<sc-if value="{{ tl.isDrill }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<path d="M30 12 H70" fill="none" stroke="#2b2118" stroke-width="12" stroke-linecap="round"/>
+<path d="M30 12 H70" fill="none" stroke="#8a8a8a" stroke-width="5" stroke-linecap="round"/>
+<rect x="38" y="20" width="24" height="44" rx="7" fill="#ff9800" stroke="#2b2118" stroke-width="4"/>
+<path d="M50 64 V90" fill="none" stroke="#2b2118" stroke-width="10" stroke-linecap="round"/>
+<path d="M50 64 V90" fill="none" stroke="#bbb" stroke-width="4" stroke-linecap="round"/>
+<path d="M44 90 L50 100 L56 90 Z" fill="#555" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+<sc-if value="{{ tl.isExc }}" hint-placeholder-val="{{ false }}">
+<svg class="ico" viewBox="0 0 100 100" aria-hidden="true">
+<rect x="10" y="72" width="56" height="16" rx="8" fill="#3a3a3a" stroke="#2b2118" stroke-width="4"/>
+<rect x="18" y="44" width="36" height="30" rx="6" fill="#ffd23f" stroke="#2b2118" stroke-width="4"/>
+<rect x="34" y="50" width="16" height="14" rx="3" fill="#bfe3ff" stroke="#2b2118" stroke-width="3"/>
+<path d="M52 52 L74 26 L88 52" fill="none" stroke="#2b2118" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M52 52 L74 26 L88 52" fill="none" stroke="#ffd23f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M86 52 L96 46 L96 66 L82 66 Z" fill="#b8c4cc" stroke="#2b2118" stroke-width="3" stroke-linejoin="round"/>
+</svg>
+</sc-if>
+</button>
+</sc-for>
+</sc-if>
+
+<button class="hud" aria-label="Zum Start" onClick="{{ goHome }}" style="left:16px">
+<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+<circle cx="32" cy="32" r="29" fill="#ffd23f" stroke="#2b2118" stroke-width="4"/>
+<path d="M16 34 L32 18 L48 34 V48 H16 Z" fill="#fff" stroke="#2b2118" stroke-width="4" stroke-linejoin="round"/>
+<rect x="28" y="36" width="8" height="12" fill="#e74c3c" stroke="#2b2118" stroke-width="3"/>
+</svg>
+</button>
+</sc-if>
+
+<sc-if value="{{ showDev }}" hint-placeholder-val="{{ true }}">
+<button aria-label="Entwickler-Optionen" onClick="{{ toggleDevPanel }}" style="position:absolute;left:16px;top:648px;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.75);border:4px solid #2b2118;z-index:60;display:flex;align-items:center;justify-content:center">
+<svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true"><circle cx="20" cy="20" r="7" fill="none" stroke="#2b2118" stroke-width="4"/><path d="M20 4 V10 M20 30 V36 M4 20 H10 M30 20 H36 M9 9 L13 13 M27 27 L31 31 M31 9 L27 13 M13 27 L9 31" fill="none" stroke="#2b2118" stroke-width="4" stroke-linecap="round"/></svg>
+</button>
+<sc-if value="{{ dev.open }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:16px;top:430px;width:380px;height:204px;border-radius:20px;background:#fff3d6;border:5px solid #2b2118;z-index:60;padding:14px 16px;box-sizing:border-box;color:#2b2118">
+<div style="font-size:22px;font-weight:700;margin-bottom:10px">Entwickler</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+<span style="font-size:19px;font-weight:500">Alle Level freigeschaltet</span>
+<button class="sw2 {{ dev.cls }}" aria-label="Alle Level freischalten" onClick="{{ dev.toggle }}">{{ dev.label }}</button>
+</div>
+<button class="cbtn" onClick="{{ dev.testBeach }}" style="margin-bottom:8px;width:100%">Bootsfahrt: Strand testen</button>
+<button class="cbtn" onClick="{{ dev.testIsland }}" style="width:100%">Bootsfahrt: Insel testen</button>
+</div>
+</sc-if>
+</sc-if>
+
+<!-- ===================== LEVEL GESCHAFFT ===================== -->
+<sc-if value="{{ cheer }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none;overflow:hidden;z-index:40">
+<sc-for list="{{ confetti }}" as="c" hint-placeholder-count="20">
+<div class="conf" style="left:{{ c.x }}px;width:{{ c.s }}px;height:{{ c.s2 }}px;background:{{ c.col }};animation-delay:{{ c.d }}s"></div>
+</sc-for>
+</div>
+<div style="position:absolute;left:100px;top:88px;width:1080px;height:72px;border-radius:36px;background:#ffd23f;border:5px solid #2b2118;box-sizing:border-box;z-index:45;display:flex;align-items:center;justify-content:center;gap:16px">
+<svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true">
+<path d="M50 6 L62 38 L95 38 L68 58 L79 92 L50 71 L21 92 L32 58 L5 38 L38 38 Z" fill="#fff" stroke="#2b2118" stroke-width="5" stroke-linejoin="round"/>
+</svg>
+<span style="font-size:28px;font-weight:700;color:#2b2118">Super! {{ cheerName }} ist fertig!</span>
+<button class="cbtn" onClick="{{ doLook }}">Umschauen</button>
+<button class="cbtn" onClick="{{ goHome }}">Start</button>
+<sc-if value="{{ hasNextLv }}" hint-placeholder-val="{{ true }}">
+<button class="cbtn" onClick="{{ doNext }}" style="background:#8ed0ff">Nächster Dino</button>
+</sc-if>
+</div>
+</sc-if>
+
+</div>
+</template>
+<script type="text/plain" id="logic">
+class Component extends DCLogic {
+  defaults() {
+    return {
+      scene: 'launch', av: { g: 'b', skin: 1, hair: 1, style: 0, hat: 1, hatC: 0, top: 0, bottom: 3, bt: 2, shoes: 0 },
+      dev: false, devOpen: false, boat: { pct: 0, hint: false, arrived: false }, lv: 0, room: 0, cx: 150, cy: 560, dur: 0, face: 1, walking: false,
+      acting: null, actSpot: null, tool: 'shovel', prog: {}, collected: {}, placed: {},
+      selected: null, wiggle: null, hintTool: null, pop: [], burst: null, fresh: null, cheer: false
+    };
+  }
+  get S() { return Object.assign(this.defaults(), this.state || {}); }
+  get KINDS() { return ['skull', 'spine', 'ribs', 'tail', 'legs', 'arm']; }
+  get NAMES() {
+    return ['T-Rex', 'Triceratops', 'Stegosaurus', 'Velociraptor', 'Ankylosaurus',
+      'Parasaurolophus', 'Spinosaurus', 'Pteranodon', 'Pachycephalosaurus', 'Brachiosaurus'];
+  }
+  get TOOLKEY() { return { s: 'shovel', d: 'drill', x: 'excavator', b: 'brush' }; }
+  get TOOLTIME() { return { shovel: 800, brush: 700, drill: 900, excavator: 1100 }; }
+  get TOOLBEEP() { return { shovel: [300], brush: [520], drill: [180, 140, 180], excavator: [120, 100] }; }
+  get TOOLLABEL() { return { shovel: 'Schaufel', brush: 'Pinsel', drill: 'Bohrer', excavator: 'Bagger' }; }
+  circ(cx, cy, r) {
+    return 'M' + (cx - r) + ' ' + cy + ' a' + r + ' ' + r + ' 0 1 0 ' + (2 * r) + ' 0 a' + r + ' ' + r + ' 0 1 0 ' + (-2 * r) + ' 0 Z';
+  }
+  get LEVELS() {
+    const A = (id, kinds, x, y, steps, req) => ({ id: id, kinds: kinds, x: x, y: y, steps: steps, req: req || null });
+    const SB = ['shovel', 'brush'];
+    const SDB = ['shovel', 'brush', 'drill'];
+    const ALL = ['shovel', 'brush', 'drill', 'excavator'];
+    return [
+      { sign: 'WÜSTE', tools: SB, lay: { hz: 392, pit: [640, 510, 580, 116], rect: false, sign: 540, start: [150, 565] }, spots: [
+        A('s1', ['skull'], 230, 470, 'ssb'), A('s2', ['spine'], 400, 545, 'bb'), A('s3', ['tail'], 570, 465, 'ssb'),
+        A('s4', ['ribs'], 740, 545, 'bb'), A('s5', ['legs'], 910, 465, 'ssb'), A('s6', ['arm'], 1050, 545, 'bb')] },
+      { sign: 'DSCHUNGEL', tools: SB, lay: { hz: 300, pit: [640, 430, 330, 150], rect: false, sign: 340, start: [640, 480] }, spots: [
+        A('s1', ['skull'], 410, 430, 'sssbb'), A('s2', ['spine'], 525, 343, 'ssb'), A('s3', ['ribs'], 755, 343, 'bb'),
+        A('s4', ['tail'], 870, 430, 'bb'), A('s5', ['legs'], 755, 517, 'sssbb'), A('s6', ['arm'], 525, 517, 'ssb')] },
+      { sign: 'STRAND', tools: SB, lay: { hz: 450, pit: [640, 535, 560, 70], rect: false, sign: 760, start: [110, 565] }, spots: [
+        A('s1', ['skull'], 200, 520, 'bb'), A('s2', ['spine', 'ribs'], 390, 555, 'sssbb'),
+        A('s3', ['tail', 'legs'], 850, 550, 'sssbb'), A('s4', ['arm'], 1040, 510, 'ssb', 's5'),
+        A('s5', [], 600, 505, 'ssb')] },
+      { sign: 'STEINBRUCH', tools: SDB, lay: { hz: 330, pit: [760, 470, 420, 140], rect: true, sign: 250, start: [480, 575] }, spots: [
+        A('s1', ['skull'], 430, 350, 'ddbb'), A('s2', ['spine'], 560, 440, 'ssb'), A('s3', ['ribs'], 690, 525, 'dddbb'),
+        A('s4', ['tail'], 840, 545, 'dssbb'), A('s5', ['legs'], 950, 450, 'bb'), A('s6', ['arm'], 1060, 365, 'ddbb')] },
+      { sign: 'NACHT', tools: SDB, lay: { hz: 420, pit: [450, 515, 450, 105], rect: false, sign: 700, start: [120, 565] }, spots: [
+        A('s1', ['skull'], 160, 500, 'dsbb'), A('s2', ['spine'], 300, 565, 'sssbb'), A('s3', ['ribs'], 500, 495, 'ddbb', 's2'),
+        A('s4', ['tail'], 660, 555, 'ssb'), A('s5', ['legs'], 320, 450, 'ddsbb'), A('s6', ['arm'], 640, 445, 'bb', 's5'),
+        A('s7', [], 810, 520, 'dsb')] },
+      { sign: 'VULKAN', tools: ALL, lay: { hz: 240, pit: [640, 470, 520, 140], rect: false, sign: 90, start: [130, 565] }, spots: [
+        A('s1', ['skull'], 230, 480, 'xxbb'), A('s2', ['spine'], 430, 400, 'ssb'), A('s3', ['ribs'], 800, 400, 'xbb'),
+        A('s4', ['tail'], 500, 550, 'dbb'), A('s5', ['legs'], 1030, 480, 'xdsbb'), A('s6', ['arm'], 760, 550, 'ddbb')] },
+      { sign: 'EISWÜSTE', tools: ALL, lay: { hz: 360, pit: [640, 485, 420, 130], rect: false, sign: 120, start: [160, 575] }, spots: [
+        A('s1', ['skull'], 390, 410, 'xdbb'), A('s2', ['spine', 'ribs'], 640, 450, 'xxsbb', 's5'),
+        A('s3', ['tail'], 890, 410, 'dddbb'), A('s4', ['legs', 'arm'], 890, 555, 'xdssbb', 's3'),
+        A('s5', [], 390, 555, 'ssb'), A('s6', [], 640, 568, 'dbb')] },
+      { sign: 'CANYON', tools: ALL, lay: { hz: 190, pit: [640, 400, 340, 210], rect: true, sign: 100, start: [330, 590] }, spots: [
+        A('s1', ['skull'], 560, 255, 'xxbb'), A('s2', ['spine'], 750, 290, 'dssbb'), A('s3', ['ribs'], 460, 380, 'dddsbb', 's2'),
+        A('s4', ['tail'], 830, 400, 'xsbb'), A('s5', ['legs'], 650, 440, 'ddbb', 's4'), A('s6', ['arm'], 470, 490, 'xdbb'),
+        A('s7', [], 800, 530, 'xbb'), A('s8', [], 640, 565, 'ssb')] },
+      { sign: 'SUMPF', tools: ALL, lay: { hz: 340, pit: [580, 470, 540, 140], rect: false, sign: 940, start: [100, 565] }, spots: [
+        A('s1', ['skull'], 190, 440, 'xdsbb'), A('s2', ['spine', 'ribs'], 410, 410, 'xxxdbb', 's1'),
+        A('s3', ['tail'], 650, 415, 'ddddbb'), A('s4', ['legs'], 880, 440, 'xsbb', 's3'), A('s5', ['arm'], 1030, 535, 'dsbb'),
+        A('s6', [], 300, 540, 'ssb'), A('s7', [], 540, 535, 'xdb'), A('s8', [], 790, 550, 'dbb')] },
+      { sign: 'DINO-INSEL', tools: ALL, lay: { hz: 300, pit: [620, 475, 500, 140], rect: false, sign: 880, start: [200, 565] }, spots: [
+        A('s1', ['skull'], 400, 400, 'xxdbb'), A('s2', ['spine'], 620, 395, 'xdssbb', 's1'), A('s3', ['ribs'], 840, 405, 'dddsbb'),
+        A('s4', ['tail'], 500, 480, 'xxsbb', 's3'), A('s5', ['legs'], 740, 485, 'xdddbb', 's4'), A('s6', ['arm'], 230, 480, 'ddsbb'),
+        A('s7', [], 370, 535, 'xsbb'), A('s8', [], 1000, 485, 'dsb'), A('s9', [], 880, 535, 'xbb')] }
+    ];
+  }
+  get DINOS() {
+    const C = (cx, cy, r) => this.circ(cx, cy, r);
+    return [
+      { order: ['tail', 'legs', 'spine', 'ribs', 'arm', 'skull'], parts: {
+        tail: { s: 'M150 175 Q80 200 30 290', w: 28, wi: 20, seg: 1, slot: [85, 216] },
+        legs: { s: 'M185 185 Q235 255 215 335', w: 34, wi: 24, t: 'M215 335 L285 345', tw: 26, twi: 18, slot: [215, 265] },
+        spine: { s: 'M150 175 Q300 100 450 140', w: 30, wi: 22, seg: 1, slot: [300, 125] },
+        ribs: { s: 'M285 130 Q262 195 292 250 M325 126 Q305 200 338 258 M365 128 Q352 195 385 245', w: 18, wi: 10, slot: [332, 195] },
+        arm: { s: 'M415 185 Q450 205 440 240', w: 18, wi: 10, dS: 'M440 240 L430 256 M440 240 L444 260 M440 240 L458 252', slot: [430, 215] },
+        skull: { f: 'M450 140 C450 100 500 85 560 95 C600 100 625 125 620 150 L615 168 L470 176 C455 170 450 155 450 140 Z M470 176 L615 168 L605 200 C570 214 510 212 485 196 Z',
+          dF: C(500, 125, 12) + ' ' + C(596, 118, 5),
+          dS: 'M500 178 L508 192 L516 177 M530 176 L538 190 L546 175 M560 174 L568 188 L576 173 M590 171 L598 185 L606 169', slot: [535, 145] } } },
+      { order: ['tail', 'legs', 'spine', 'ribs', 'arm', 'skull'], parts: {
+        tail: { s: 'M110 170 Q70 190 28 250', w: 30, wi: 22, seg: 1, slot: [70, 210] },
+        legs: { s: 'M150 190 Q175 260 150 340', w: 36, wi: 26, t: 'M150 340 L210 346', tw: 28, twi: 20, slot: [165, 270] },
+        spine: { s: 'M110 170 Q250 130 400 155', w: 30, wi: 22, seg: 1, slot: [255, 140] },
+        ribs: { s: 'M190 158 Q168 210 196 262 M232 152 Q212 215 240 268 M274 150 Q258 215 286 268 M316 153 Q304 215 332 262', w: 18, wi: 10, slot: [260, 215] },
+        arm: { s: 'M380 190 Q400 260 385 340', w: 34, wi: 24, t: 'M385 340 L445 346', tw: 26, twi: 18, slot: [390, 270] },
+        skull: { f: 'M395 165 Q372 60 468 50 Q550 48 552 150 Z M455 150 C460 118 520 112 578 126 L612 150 L598 182 Q520 196 462 180 Z M508 124 L556 50 L538 130 Z M476 128 L492 56 L504 130 Z M588 128 L612 100 L608 140 Z',
+          dF: C(518, 146, 9) + ' ' + C(430, 104, 5) + ' ' + C(446, 78, 5) + ' ' + C(480, 68, 5), slot: [500, 115] } } },
+      { order: ['tail', 'legs', 'spine', 'ribs', 'arm', 'skull'], parts: {
+        tail: { f: 'M66 272 L40 240 L72 280 Z M54 296 L20 284 L58 308 Z M92 248 L82 212 L102 244 Z', s: 'M120 210 Q80 235 52 300', w: 28, wi: 20, seg: 1, slot: [70, 265] },
+        legs: { s: 'M165 195 Q200 265 175 335', w: 36, wi: 26, t: 'M175 335 L235 345', tw: 28, twi: 20, slot: [190, 265] },
+        spine: { f: 'M156 168 L172 108 L194 160 Z M199 150 L218 86 L240 142 Z M245 142 L266 76 L288 138 Z M292 144 L314 82 L334 146 Z M340 160 L364 104 L380 168 Z',
+          s: 'M120 210 Q250 70 430 200', w: 26, wi: 18, seg: 1, slot: [262, 125] },
+        ribs: { s: 'M235 150 Q215 205 245 250 M275 143 Q258 205 285 258 M315 146 Q305 205 332 255', w: 18, wi: 10, slot: [278, 205] },
+        arm: { s: 'M410 195 Q430 265 415 335', w: 30, wi: 22, t: 'M415 335 L470 343', tw: 24, twi: 16, slot: [425, 265] },
+        skull: { f: 'M440 215 C450 195 500 190 540 205 L575 225 L560 250 Q500 262 450 248 Z', dF: C(506, 214, 8) + ' ' + C(560, 222, 4),
+          dS: 'M470 242 Q520 250 556 240', slot: [508, 230] } } },
+      { order: ['tail', 'legs', 'spine', 'ribs', 'arm', 'skull'], parts: {
+        tail: { s: 'M170 190 Q100 210 20 240', w: 18, wi: 12, seg: 1, slot: [80, 220] },
+        legs: { s: 'M190 195 Q225 255 205 340', w: 24, wi: 16, t: 'M205 340 L250 346', tw: 18, twi: 12,
+          dS: 'M250 346 L270 350 M250 346 L268 336 M205 340 L222 318', slot: [210, 268] },
+        spine: { s: 'M170 190 Q290 150 410 160', w: 20, wi: 14, seg: 1, slot: [290, 150] },
+        ribs: { s: 'M250 168 Q238 205 258 235 M285 163 Q276 205 296 232 M320 162 Q314 200 334 226', w: 12, wi: 6, slot: [290, 205] },
+        arm: { s: 'M395 175 Q420 195 410 220', w: 12, wi: 6, dS: 'M410 220 L400 234 M410 220 L416 236 M410 220 L426 230', slot: [410, 205] },
+        skull: { f: 'M410 150 C420 125 470 118 520 128 C565 136 590 150 596 162 L560 168 L420 172 C410 168 408 158 410 150 Z M420 172 L560 168 L545 188 C500 198 450 192 432 184 Z',
+          dF: C(462, 140, 9), dS: 'M470 170 L476 182 L482 170 M495 169 L501 181 L507 169 M520 168 L526 180 L532 168 M545 167 L551 179 L557 167', slot: [500, 150] } } },
+      { order: ['tail', 'legs', 'spine', 'ribs', 'arm', 'skull'], parts: {
+        tail: { f: 'M30 270 C6 270 4 312 34 318 C62 318 66 280 40 268 Z M20 266 L8 252 L28 270 Z M56 272 L70 258 L58 286 Z',
+          s: 'M130 235 Q80 250 36 285', w: 24, wi: 16, seg: 1, slot: [50, 290] },
+        legs: { s: 'M185 235 Q205 290 190 340', w: 38, wi: 28, t: 'M190 340 L240 346', tw: 28, twi: 20, slot: [200, 285] },
+        spine: { f: 'M165 222 L183 186 L201 218 Z M219 213 L237 176 L255 208 Z M275 211 L293 174 L311 206 Z M333 216 L351 180 L369 212 Z',
+          s: 'M130 235 Q260 185 410 225', w: 30, wi: 22, seg: 1, slot: [260, 185] },
+        ribs: { s: 'M200 215 Q180 260 205 290 M245 208 Q228 262 252 292 M290 207 Q276 262 300 292 M335 212 Q324 262 346 288', w: 18, wi: 10, slot: [270, 262] },
+        arm: { s: 'M360 235 Q378 290 365 340', w: 36, wi: 26, t: 'M365 340 L415 346', tw: 26, twi: 18, slot: [375, 288] },
+        skull: { f: 'M410 225 C420 205 470 200 510 212 L548 235 L536 262 Q480 274 424 258 Z M430 210 L418 188 L446 206 Z M520 214 L536 192 L534 222 Z',
+          dF: C(482, 228, 8), dS: 'M440 258 Q490 266 530 256', slot: [480, 238] } } },
+      { order: ['tail', 'legs', 'spine', 'ribs', 'arm', 'skull'], parts: {
+        tail: { s: 'M150 190 Q90 215 28 270', w: 24, wi: 16, seg: 1, slot: [75, 232] },
+        legs: { s: 'M185 200 Q225 268 205 340', w: 34, wi: 24, t: 'M205 340 L270 346', tw: 26, twi: 18, slot: [210, 272] },
+        spine: { s: 'M150 190 Q290 140 430 170', w: 28, wi: 20, seg: 1, slot: [290, 152] },
+        ribs: { s: 'M215 165 Q196 215 222 262 M255 158 Q238 215 265 268 M295 156 Q282 215 308 268 M335 160 Q326 215 350 262', w: 18, wi: 10, slot: [278, 218] },
+        arm: { s: 'M400 190 Q425 220 415 255', w: 18, wi: 10, dS: 'M415 255 L403 268 M415 255 L424 270', slot: [410, 225] },
+        skull: { f: 'M430 160 C436 132 480 120 520 128 C560 134 596 146 604 162 L598 180 L470 184 C442 180 428 172 430 160 Z M490 126 C470 80 400 50 340 70 C326 76 330 88 344 86 C392 78 440 100 458 138 Z',
+          dF: C(500, 146, 8), dS: 'M452 176 Q520 186 596 174', slot: [520, 152] } } },
+      { order: ['tail', 'legs', 'spine', 'ribs', 'arm', 'skull'], parts: {
+        tail: { s: 'M150 190 Q90 215 30 285', w: 26, wi: 18, seg: 1, slot: [85, 240] },
+        legs: { s: 'M185 200 Q230 265 210 340', w: 34, wi: 24, t: 'M210 340 L280 346', tw: 26, twi: 18, slot: [220, 272] },
+        spine: { f: 'M192 172 L206 92 L220 164 Z M236 160 L250 78 L264 152 Z M279 153 L293 68 L307 146 Z M322 151 L336 74 L350 148 Z M366 154 L380 90 L394 152 Z',
+          s: 'M150 190 Q290 120 440 160', w: 26, wi: 18, seg: 1, slot: [290, 130] },
+        ribs: { s: 'M240 160 Q222 215 250 262 M285 152 Q270 215 298 268 M330 150 Q320 215 346 262', w: 18, wi: 10, slot: [300, 215] },
+        arm: { s: 'M395 180 Q430 200 420 235', w: 16, wi: 9, dS: 'M420 235 L408 252 M420 235 L424 256 M420 235 L440 248', slot: [418, 218] },
+        skull: { f: 'M440 150 C445 124 500 112 560 122 C600 128 628 138 634 150 L632 164 L450 172 C442 168 438 160 440 150 Z M450 172 L632 164 L620 188 C560 200 490 196 462 184 Z',
+          dF: C(484, 134, 9), dS: 'M500 172 L506 186 L512 171 M528 170 L534 184 L540 169 M556 168 L562 182 L568 167 M584 166 L590 180 L596 165 M610 164 L616 176 L622 163', slot: [540, 152] } } },
+      { order: ['tail', 'legs', 'arm', 'spine', 'ribs', 'skull'], parts: {
+        tail: { s: 'M255 252 Q232 290 212 332', w: 14, wi: 8, slot: [215, 312] },
+        legs: { s: 'M292 290 L278 340 M322 294 L332 342', w: 14, wi: 8, dS: 'M278 340 L264 346 M332 342 L346 348', slot: [300, 330] },
+        arm: { f: 'M282 200 L90 90 L118 218 L188 192 L232 236 Z M318 200 L520 80 L490 212 L430 196 L384 238 Z',
+          s: 'M282 200 L90 90 M318 200 L520 80', w: 16, wi: 9, dS: 'M150 118 L122 212 M110 100 L72 184 M470 104 L498 196 M432 122 L470 214', slot: [160, 140] },
+        spine: { s: 'M250 252 Q300 205 350 245', w: 30, wi: 22, seg: 1, slot: [265, 238] },
+        ribs: { s: 'M270 242 Q262 276 280 296 M300 238 Q296 282 310 302 M330 242 Q332 280 346 298', w: 14, wi: 8, slot: [335, 272] },
+        skull: { f: 'M352 238 Q372 190 420 176 L590 168 L610 178 L430 200 Q400 232 380 252 Z M420 176 L378 138 L410 172 Z',
+          dF: C(434, 190, 6), slot: [480, 185] } } },
+      { order: ['tail', 'legs', 'spine', 'ribs', 'arm', 'skull'], parts: {
+        tail: { s: 'M150 190 Q88 214 26 275', w: 24, wi: 16, seg: 1, slot: [75, 232] },
+        legs: { s: 'M185 200 Q228 268 208 340', w: 32, wi: 22, t: 'M208 340 L270 346', tw: 24, twi: 16, slot: [212, 272] },
+        spine: { s: 'M150 190 Q280 145 420 172', w: 26, wi: 18, seg: 1, slot: [290, 152] },
+        ribs: { s: 'M225 165 Q207 215 233 262 M268 158 Q252 215 278 266 M312 158 Q300 215 326 262', w: 16, wi: 9, slot: [272, 218] },
+        arm: { s: 'M395 190 Q420 215 410 245', w: 14, wi: 8, dS: 'M410 245 L400 258 M410 245 L418 260', slot: [405, 222] },
+        skull: { f: 'M425 170 C428 120 470 96 515 104 C560 112 585 140 584 166 L578 182 L440 186 C428 182 424 176 425 170 Z M584 166 L612 176 L584 186 Z M440 112 L424 92 L456 100 Z M470 100 L462 76 L486 98 Z',
+          dF: C(520, 150, 8), dS: 'M470 160 Q500 150 540 162', slot: [510, 142] } } },
+      { order: ['tail', 'legs', 'spine', 'ribs', 'arm', 'skull'], parts: {
+        tail: { s: 'M150 185 Q90 205 30 262', w: 26, wi: 18, seg: 1, slot: [75, 225] },
+        legs: { s: 'M175 195 Q205 270 185 340', w: 40, wi: 30, t: 'M185 340 L245 346', tw: 30, twi: 22, slot: [195, 272] },
+        spine: { s: 'M150 185 Q270 140 390 165 Q450 172 480 122 Q500 84 520 62', w: 28, wi: 20, seg: 1, slot: [320, 150] },
+        ribs: { s: 'M215 160 Q195 215 225 262 M255 152 Q238 215 268 268 M295 152 Q282 215 310 268 M335 158 Q326 215 352 262', w: 18, wi: 10, slot: [275, 215] },
+        arm: { s: 'M370 190 Q390 270 372 340', w: 40, wi: 30, t: 'M372 340 L432 346', tw: 30, twi: 22, slot: [385, 272] },
+        skull: { f: 'M505 52 C508 36 535 30 560 36 L592 46 L588 62 Q550 72 515 66 Z', dF: C(534, 46, 6),
+          dS: 'M530 64 Q560 66 584 58', slot: [552, 50] } } }
+    ];
+  }
+  later(fn, ms) {
+    this._t = this._t || [];
+    this._t.push(setTimeout(fn, ms));
+  }
+  componentWillUnmount() {
+    (this._t || []).forEach(clearTimeout);
+  }
+  beep(freqs) {
+    try {
+      const A = window.AudioContext || window.webkitAudioContext;
+      if (!A) return;
+      this.ac = this.ac || new A();
+      const ac = this.ac;
+      if (ac.state === "suspended") ac.resume();
+      const t = ac.currentTime;
+      freqs.forEach((f, i) => {
+        const o = ac.createOscillator();
+        const g = ac.createGain();
+        o.type = 'triangle';
+        o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t + i * 0.12);
+        g.gain.exponentialRampToValueAtTime(0.18, t + i * 0.12 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.12 + 0.22);
+        o.connect(g);
+        g.connect(ac.destination);
+        o.start(t + i * 0.12);
+        o.stop(t + i * 0.12 + 0.26);
+      });
+    } catch (e) {}
+  }
+  walkTime(x0, y0, x1, y1) {
+    const d = Math.hypot(x1 - x0, y1 - y0);
+    return Math.max(0.35, Math.min(1.6, d / 420));
+  }
+  levelDone(i, placed) {
+    return this.KINDS.every((k) => placed[i + '-' + k]);
+  }
+  maxLevel(placed) {
+    if (this.S.dev) return 9;
+    let u = 0;
+    while (u < 10 && this.levelDone(u, placed)) u++;
+    return Math.min(9, u);
+  }
+  spotDone(lv, id, prog) {
+    const sp = this.LEVELS[lv].spots.find((q) => q.id === id);
+    return !sp || (prog[lv + '-' + id] || 0) >= sp.steps.length;
+  }
+  startLevel(i) {
+    if (i > this.maxLevel(this.S.placed)) return;
+    this.busy = false;
+    this.setState({
+      scene: 'dig', lv: i, room: i, cx: this.LEVELS[i].lay.start[0], cy: this.LEVELS[i].lay.start[1], dur: 0, face: 1, walking: false,
+      acting: null, actSpot: null, tool: 'shovel', selected: null, cheer: false,
+      hintTool: null, burst: null, pop: [], wiggle: null
+    });
+  }
+  goHome() {
+    this.busy = false;
+    this.setState({ scene: 'start', cheer: false, acting: null, actSpot: null, walking: false, selected: null });
+  }
+  nextLevel() {
+    const s = this.S;
+    if (s.lv < 9 && this.levelDone(s.lv, s.placed)) this.startLevel(s.lv + 1); else this.goHome();
+  }
+  act(sp) {
+    const s = this.S;
+    if (this.busy || s.scene !== 'dig') return;
+    const lv = s.lv;
+    const key = lv + '-' + sp.id;
+    const p = s.prog[key] || 0;
+    const steps = sp.steps;
+    if (p >= steps.length) return;
+    if (sp.req && !this.spotDone(lv, sp.req, s.prog)) {
+      this.setState({ wiggle: key });
+      this.beep([200, 160]);
+      this.later(() => { this.setState({ wiggle: null }); }, 700);
+      return;
+    }
+    const need = this.TOOLKEY[steps[p]];
+    if (s.tool !== need) {
+      this.setState({ wiggle: key, hintTool: need });
+      this.beep([200, 160]);
+      this.later(() => { this.setState({ wiggle: null, hintTool: null }); }, 1100);
+      return;
+    }
+    this.busy = true;
+    const tx = sp.x;
+    const ty = Math.min(sp.y + 52, 592);
+    const dur = this.walkTime(s.cx, s.cy, tx, ty);
+    this.setState({ cx: tx, cy: ty, dur: dur, face: tx >= s.cx ? 1 : -1, walking: true });
+    this.later(() => { this.setState({ walking: false, acting: need, actSpot: sp.id }); }, dur * 1000);
+    this.later(() => {
+      const cur = this.S;
+      const prog = Object.assign({}, cur.prog); prog[key] = p + 1;
+      if (p + 1 >= steps.length) {
+        const col = Object.assign({}, cur.collected);
+        const pops = [];
+        sp.kinds.forEach((k) => { col[lv + '-' + k] = true; pops.push(lv + '-' + k); });
+        this.setState({ prog: prog, collected: col, acting: null, actSpot: null, burst: { x: sp.x, y: sp.y, junk: sp.kinds.length === 0 }, pop: pops });
+        this.beep(sp.kinds.length ? [660, 880, 1100] : [330, 240, 330]);
+        this.later(() => { this.setState({ burst: null, pop: [] }); }, 900);
+      } else {
+        this.setState({ prog: prog, acting: null, actSpot: null });
+        this.beep(this.TOOLBEEP[need]);
+      }
+      this.busy = false;
+    }, dur * 1000 + this.TOOLTIME[need]);
+  }
+  goTo(target) {
+    const s = this.S;
+    if (this.busy || s.scene === target) return;
+    this.busy = true;
+    const tx = target === 'museum' ? 1150 : 130;
+    const ty = 550;
+    const dur = this.walkTime(s.cx, s.cy, tx, ty);
+    this.setState({ cx: tx, cy: ty, dur: dur, face: tx > s.cx ? 1 : -1, walking: true });
+    this.later(() => {
+      const cur = this.S;
+      const J = target === 'museum' ? this.JOURNEY(cur.lv) : null;
+      if (J) { this.busy = false; this.startBoat(J, 'museum'); return; }
+      this.setState({
+        scene: target, room: target === 'museum' ? cur.lv : cur.room,
+        cx: target === 'museum' ? 180 : 1100, cy: 565, dur: 0,
+        face: target === 'museum' ? 1 : -1, walking: false, selected: null
+      });
+      this.busy = false;
+    }, dur * 1000 + 60);
+  }
+  moveRoom(dir) {
+    const s = this.S;
+    const nr = s.room + dir;
+    if (this.busy || nr < 0 || nr > this.maxLevel(s.placed)) return;
+    this.busy = true;
+    const tx = dir > 0 ? 1150 : 130;
+    const ty = 550;
+    const dur = this.walkTime(s.cx, s.cy, tx, ty);
+    this.setState({ cx: tx, cy: ty, dur: dur, face: dir, walking: true });
+    this.later(() => {
+      this.setState({ room: nr, cx: dir > 0 ? 180 : 1070, cy: 560, dur: 0, face: dir, walking: false, selected: null });
+      this.busy = false;
+    }, dur * 1000 + 60);
+  }
+  jumpRoom(i) {
+    if (this.busy || i > this.maxLevel(this.S.placed)) return;
+    this.setState({ room: i, cx: 180, cy: 560, dur: 0, face: 1, walking: false, selected: null });
+  }
+  setTool(t) {
+    if (this.busy) return;
+    this.setState({ tool: t, hintTool: null });
+  }
+  pick(kind) {
+    const s = this.S;
+    const key = s.lv + '-' + kind;
+    if (!s.collected[key] || s.placed[key]) return;
+    this.setState({ selected: s.selected === kind ? null : kind });
+  }
+  place(kind) {
+    const s = this.S;
+    const key = s.lv + '-' + kind;
+    if (s.placed[key] || s.room !== s.lv) return;
+    const ok = s.collected[key] && (!s.selected || s.selected === kind);
+    if (!ok) {
+      this.setState({ wiggle: kind });
+      this.later(() => { this.setState({ wiggle: null }); }, 600);
+      return;
+    }
+    const placed = Object.assign({}, s.placed); placed[key] = true;
+    const done = this.levelDone(s.lv, placed);
+    this.setState({ placed: placed, selected: null, cheer: done, fresh: key });
+    this.beep(done ? [523, 659, 784, 1047] : [523, 784]);
+    this.later(() => { this.setState({ fresh: null }); }, 900);
+  }
+  get BOATS() {
+    return {
+      beach: { sky: ['#4fc3f0', '#d4f3ff'], sea: ['#25bfd3', '#1fb0c6'], foam: ['#ffffff', '#cdf4f8'], bank: ['#f6e0a0', '#eed38a'],
+        fog: '#d4f3ff', roadW: 2600, speed: 3300, look: 'beach', seed: 7, dens: 1.0 },
+      island: { sky: ['#3f9be0', '#c4e8ff'], sea: ['#1b78bf', '#1670b3'], foam: ['#f2faff', '#bfe3f7'], bank: ['#5fbf5a', '#52b04e'],
+        fog: '#c4e8ff', roadW: 2100, speed: 3500, look: 'island', seed: 21, dens: 1.35 }
+    };
+  }
+  JOURNEY(lv) { return { 2: 'beach', 9: 'island' }[lv] || null; }
+  rng(seed) {
+    let a = seed;
+    return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  buildTrack(cfg) {
+    const R = this.rng(cfg.seed);
+    const segs = [];
+    const add = (curve) => { const n = segs.length; segs.push({ i: n, z1: n * 200, z2: (n + 1) * 200, curve: curve, sprites: [], alt: Math.floor(n / 3) % 2 }); };
+    const ease = (a, b, p) => a + (b - a) * ((-Math.cos(p * Math.PI) / 2) + 0.5);
+    const road = (e, h, l, c) => {
+      for (let n = 0; n < e; n++) add(ease(0, c, n / e));
+      for (let n = 0; n < h; n++) add(c);
+      for (let n = 0; n < l; n++) add(ease(c, 0, n / l));
+    };
+    for (let n = 0; n < 30; n++) add(0);
+    const plan = [[25, 30, 25, 2.2], [20, 10, 20, 0], [30, 40, 30, -3], [20, 20, 20, 0], [25, 45, 25, 3.6], [30, 10, 30, -2], [25, 35, 25, -3.4],
+      [20, 15, 20, 0], [30, 40, 30, 3], [25, 20, 25, -2.4], [25, 40, 25, 3.2], [20, 40, 20, -2.8]];
+    plan.forEach((p) => road(p[0], p[1], p[2], p[3]));
+    for (let n = 0; n < 30; n++) add(0);
+    const N = segs.length;
+    // Obstacles
+    let i = 45;
+    while (i < N - 45) {
+      const t = R();
+      const types = ['rock', 'log', 'buoy'];
+      if (t < 0.28) {
+        const ty = types[Math.floor(R() * 2)];
+        segs[i].sprites.push({ type: ty, o: -0.55, size: ty === 'rock' ? 4.2 : 5, hit: true, hw: 0.2 });
+        segs[i].sprites.push({ type: ty === 'rock' ? 'rock' : 'buoy', o: 0.55, size: 4.2, hit: true, hw: 0.2 });
+      } else {
+        const ty = types[Math.floor(R() * 3)];
+        segs[i].sprites.push({ type: ty, o: (R() * 1.7) - 0.85, size: ty === 'log' ? 5 : (ty === 'buoy' ? 3 : 4.2), hit: true, hw: ty === 'log' ? 0.24 : (ty === 'buoy' ? 0.12 : 0.2) });
+      }
+      i += Math.floor((9 + R() * 8) / cfg.dens);
+    }
+    // Deko
+    for (let k = 4; k < N - 4; k += 2 + Math.floor(R() * 4)) {
+      const side = R() < 0.5 ? -1 : 1;
+      const ty = cfg.look === 'beach' ? (R() < 0.6 ? 'palm' : 'islet') : (R() < 0.6 ? 'palm' : (R() < 0.5 ? 'tree' : 'bigrock'));
+      segs[k].sprites.push({ type: ty, o: side * (1.35 + R() * 1.8), size: ty === 'islet' ? 7 : 4.4, hit: false, hw: 0 });
+      if (R() < 0.12) segs[k + 1].sprites.push({ type: 'dolphin', o: -side * (1.15 + R() * 0.6), size: 2.6, hit: false, hw: 0 });
+    }
+    for (let k = 40; k < N - 40; k += 14) segs[k].sprites.push({ type: 'buoy', o: (k % 28 === 0) ? -1.12 : 1.12, size: 2.6, hit: false, hw: 0 });
+    segs[N - 3].sprites.push({ type: 'museum', o: 0, size: 8, hit: false, hw: 0 });
+    return segs;
+  }
+  startBoat(kind, after) {
+    this.busy = true;
+    const cfg = this.BOATS[kind];
+    const now = performance.now();
+    this.bt = { cfg: cfg, segs: this.buildTrack(cfg), pos: 0, x: 0, speed: 0, steer: 0, touch: null, kl: false, kr: false, hitT: 0, last: now,
+      time: 0, bg: 0, arrived: false, ended: false, pctT: 0, kind: kind, after: after };
+    const b = this.bt;
+    const clamp = (v) => Math.max(-1, Math.min(1, v));
+    const px = (e) => {
+      const cv = document.getElementById('boatcv');
+      const r = cv ? cv.getBoundingClientRect() : { left: 0, width: window.innerWidth };
+      return clamp(((e.clientX - r.left) / r.width * 2 - 1) * 2);
+    };
+    b.kd = (e) => { if (e.key === 'ArrowLeft' || e.key === 'a') b.kl = true; if (e.key === 'ArrowRight' || e.key === 'd') b.kr = true; };
+    b.ku = (e) => { if (e.key === 'ArrowLeft' || e.key === 'a') b.kl = false; if (e.key === 'ArrowRight' || e.key === 'd') b.kr = false; };
+    b.pd = (e) => { if (e.target && e.target.closest && e.target.closest('button')) return; b.down = true; b.touch = px(e); };
+    b.pm = (e) => { if (b.down) b.touch = px(e); };
+    b.pu = () => { b.down = false; b.touch = null; };
+    window.addEventListener('keydown', b.kd); window.addEventListener('keyup', b.ku);
+    window.addEventListener('pointerdown', b.pd); window.addEventListener('pointermove', b.pm);
+    window.addEventListener('pointerup', b.pu); window.addEventListener('pointercancel', b.pu);
+    this.setState({ scene: 'boat', selected: null, cheer: false, boat: { pct: 0, hint: true, arrived: false } });
+    this.beep([392, 523]);
+    const loop = (t) => { if (this.bt !== b || b.ended) return; this.btFrame(t); b.raf = requestAnimationFrame(loop); };
+    b.raf = requestAnimationFrame(loop);
+  }
+  endBoat() {
+    const b = this.bt;
+    if (!b || b.ended) return;
+    b.ended = true;
+    cancelAnimationFrame(b.raf);
+    window.removeEventListener('keydown', b.kd); window.removeEventListener('keyup', b.ku);
+    window.removeEventListener('pointerdown', b.pd); window.removeEventListener('pointermove', b.pm);
+    window.removeEventListener('pointerup', b.pu); window.removeEventListener('pointercancel', b.pu);
+    this.bt = null;
+    this.busy = false;
+    if (b.after === 'museum') {
+      const s = this.S;
+      this.setState({ scene: 'museum', room: s.lv, cx: 180, cy: 560, dur: 0, face: 1, walking: false, selected: null, boat: { pct: 0, hint: false, arrived: false } });
+    } else {
+      this.setState({ scene: b.after || 'start', boat: { pct: 0, hint: false, arrived: false } });
+    }
+  }
+  skipBoat() { this.endBoat(); }
+  btFrame(now) {
+    const b = this.bt;
+    const dt = Math.min(0.05, Math.max(0.001, (now - b.last) / 1000));
+    b.last = now; b.time += dt;
+    this.btStep(dt);
+    this.btDraw();
+  }
+  btStep(dt) {
+    const b = this.bt; const c = b.cfg; const segs = b.segs;
+    const PZ = 1100;
+    const endPos = segs.length * 200 - 14 * 200 - PZ;
+    const steerIn = b.touch !== null ? b.touch : ((b.kr ? 1 : 0) - (b.kl ? 1 : 0));
+    b.steer += (steerIn - b.steer) * Math.min(1, dt * 8);
+    const remaining = endPos - b.pos;
+    let target = c.speed;
+    if (b.time < 1.2) target = c.speed * (b.time / 1.2) + 300;
+    if (remaining < 7000) target = Math.max(650, Math.min(c.speed, remaining * 0.55));
+    if (Math.abs(b.x) > 0.9) target *= 0.8;
+    if (b.arrived) target = 0;
+    b.speed += (target - b.speed) * Math.min(1, dt * (target < b.speed ? 3 : 1.3));
+    b.pos += b.speed * dt;
+    const seg = segs[Math.max(0, Math.min(segs.length - 1, Math.floor((b.pos + PZ) / 200)))];
+    const sp = Math.min(1.2, b.speed / c.speed);
+    b.x += b.steer * dt * 1.7 * Math.min(1, 0.35 + sp);
+    b.x -= seg.curve * 0.11 * dt * sp;
+    b.x = Math.max(-1.0, Math.min(1.0, b.x));
+    b.bg += -seg.curve * sp * dt * 30;
+    if (b.hitT > 0) b.hitT -= dt;
+    else {
+      for (let k = 0; k < seg.sprites.length; k++) {
+        const s = seg.sprites[k];
+        if (s.hit && Math.abs(b.x - s.o) < s.hw + 0.14) { b.speed *= 0.3; b.hitT = 1.3; b.shake = 0.35; this.beep([160, 110]); break; }
+      }
+    }
+    if (b.shake > 0) b.shake -= dt;
+    b.pctT -= dt;
+    if (b.pctT <= 0 && !b.arrived) {
+      b.pctT = 0.12;
+      this.setState({ boat: { pct: Math.max(0, Math.min(1, b.pos / endPos)), hint: b.time < 4.5, arrived: false } });
+    }
+    if (remaining <= 0 && !b.arrived) {
+      b.arrived = true;
+      this.setState({ boat: { pct: 1, hint: false, arrived: true } });
+      this.beep([523, 659, 784, 1047]);
+      this.later(() => { this.endBoat(); }, 2200);
+    }
+  }
+  mixCol(hex, fogHex, t) {
+    this._cc = this._cc || {};
+    const P = (h) => { if (!this._cc[h]) this._cc[h] = [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; return this._cc[h]; };
+    const a = P(hex); const f = P(fogHex);
+    return 'rgb(' + Math.round(a[0] + (f[0] - a[0]) * t) + ',' + Math.round(a[1] + (f[1] - a[1]) * t) + ',' + Math.round(a[2] + (f[2] - a[2]) * t) + ')';
+  }
+  btDraw() {
+    const cv = document.getElementById('boatcv');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const b = this.bt; const c = b.cfg; const segs = b.segs;
+    const W = 1280; const H = 720; const HOR = 300; const CD = 0.84; const CH = 900; const DD = 170; const PZ = 1100;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const sh = b.shake > 0 ? (Math.random() - 0.5) * 10 : 0;
+    ctx.translate(sh, 0);
+    const g = ctx.createLinearGradient(0, 0, 0, HOR);
+    g.addColorStop(0, c.sky[0]); g.addColorStop(1, c.sky[1]);
+    ctx.fillStyle = g; ctx.fillRect(-20, 0, W + 40, HOR + 2);
+    this.btSkyline(ctx, b, c, W, HOR);
+    ctx.fillStyle = c.fog; ctx.fillRect(-20, HOR, W + 40, H - HOR);
+    const baseIdx = Math.max(0, Math.min(segs.length - 1, Math.floor(b.pos / 200)));
+    const base = segs[baseIdx];
+    const basePct = (b.pos % 200) / 200;
+    let x = 0; let dx = -(base.curve * basePct);
+    const camX = b.x * c.roadW;
+    const rec = [];
+    for (let n = 0; n < DD; n++) {
+      const idx = baseIdx + n;
+      if (idx >= segs.length) break;
+      const seg = segs[idx];
+      const z1 = seg.z1 - b.pos; const z2 = seg.z2 - b.pos;
+      if (z1 > CD) {
+        const s1 = CD / z1; const s2 = CD / z2;
+        const p1 = { x: Math.round(W / 2 + s1 * (x - camX) * W / 2), y: Math.round(H / 2 - 60 + s1 * CH * H / 2), w: s1 * c.roadW * W / 2, s: s1 };
+        const p2 = { x: Math.round(W / 2 + s2 * (x + dx - camX) * W / 2), y: Math.round(H / 2 - 60 + s2 * CH * H / 2), w: s2 * c.roadW * W / 2, s: s2 };
+        if (p2.y < p1.y) rec.push({ seg: seg, p1: p1, p2: p2, n: n });
+      }
+      x += dx; dx += seg.curve;
+    }
+    for (let k = rec.length - 1; k >= 0; k--) {
+      const r = rec[k]; const p1 = r.p1; const p2 = r.p2;
+      const fog = 1 - 1 / Math.pow(Math.E, (r.n / DD) * (r.n / DD) * 3);
+      const a = r.seg.alt;
+      ctx.fillStyle = this.mixCol(c.bank[a], c.fog, fog);
+      ctx.fillRect(-20, p2.y, W + 40, p1.y - p2.y + 1);
+      const rw1 = p1.w / 14; const rw2 = p2.w / 14;
+      ctx.fillStyle = this.mixCol(c.foam[a], c.fog, fog);
+      ctx.beginPath(); ctx.moveTo(p1.x - p1.w - rw1, p1.y); ctx.lineTo(p1.x - p1.w, p1.y); ctx.lineTo(p2.x - p2.w, p2.y); ctx.lineTo(p2.x - p2.w - rw2, p2.y); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(p1.x + p1.w + rw1, p1.y); ctx.lineTo(p1.x + p1.w, p1.y); ctx.lineTo(p2.x + p2.w, p2.y); ctx.lineTo(p2.x + p2.w + rw2, p2.y); ctx.fill();
+      ctx.fillStyle = this.mixCol(c.sea[a], c.fog, fog);
+      ctx.beginPath(); ctx.moveTo(p1.x - p1.w, p1.y); ctx.lineTo(p1.x + p1.w, p1.y); ctx.lineTo(p2.x + p2.w, p2.y); ctx.lineTo(p2.x - p2.w, p2.y); ctx.fill();
+      if (r.n % 6 === 0 && r.n < 90) {
+        ctx.strokeStyle = 'rgba(255,255,255,' + (0.5 * (1 - fog)) + ')'; ctx.lineWidth = Math.max(1, p1.s * 400);
+        const wx = p1.x + ((r.seg.i * 37) % 17 - 8) / 10 * p1.w * 0.9;
+        ctx.beginPath(); ctx.moveTo(wx - p1.w * 0.1, p1.y - 2); ctx.lineTo(wx + p1.w * 0.1, p1.y - 2); ctx.stroke();
+      }
+    }
+    for (let k = rec.length - 1; k >= 0; k--) {
+      const r = rec[k]; const seg = r.seg;
+      if (!seg.sprites.length) continue;
+      const fog = 1 - 1 / Math.pow(Math.E, (r.n / DD) * (r.n / DD) * 3);
+      for (let q = 0; q < seg.sprites.length; q++) {
+        const sp = seg.sprites[q];
+        const kk = r.p1.s * (W / 2) * sp.size;
+        if (kk < 0.01) continue;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - fog * 0.85);
+        ctx.translate(r.p1.x + sp.o * r.p1.w, r.p1.y);
+        ctx.scale(kk, kk);
+        this.btSprite(ctx, sp.type, b.time + seg.i);
+        ctx.restore();
+      }
+    }
+    ctx.globalAlpha = 1;
+    this.btBoat(ctx, b, W, H);
+  }
+  btSkyline(ctx, b, c, W, HOR) {
+    const par = (f, fn) => { const off = (((b.bg * f) % 1600) + 1600) % 1600; for (let k = -1; k <= 1; k++) { ctx.save(); ctx.translate(off + k * 1600, 0); fn(); ctx.restore(); } };
+    ctx.lineJoin = 'round'; ctx.strokeStyle = '#2b2118'; ctx.lineWidth = 4;
+    ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.arc(1010, 110, 46, 0, 7); ctx.fill(); ctx.stroke();
+    const cloud = (x, y, s) => { ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-60, 0); ctx.arc(-35, -4, 26, Math.PI * 0.9, Math.PI * 1.7); ctx.arc(8, -14, 32, Math.PI * 1.2, Math.PI * 1.95); ctx.arc(48, -2, 22, Math.PI * 1.4, Math.PI * 0.4); ctx.lineTo(-60, 22); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); };
+    par(0.25, () => { cloud(180, 90, 1); cloud(560, 140, 0.8); cloud(900, 70, 1.1); cloud(1300, 130, 0.9); });
+    par(0.7, () => {
+      if (c.look === 'beach') {
+        ctx.fillStyle = '#9ed9c3';
+        [[200, 90, 150], [560, 60, 110], [980, 110, 190], [1380, 70, 130]].forEach((o) => { ctx.beginPath(); ctx.moveTo(o[0] - o[2], HOR); ctx.quadraticCurveTo(o[0], HOR - o[1] * 2, o[0] + o[2], HOR); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+      } else {
+        ctx.fillStyle = '#6c5a52';
+        ctx.beginPath(); ctx.moveTo(380, HOR); ctx.lineTo(560, 130); ctx.quadraticCurveTo(600, 118, 640, 130); ctx.lineTo(820, HOR); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ff7a3d'; ctx.beginPath(); ctx.moveTo(572, 134); ctx.quadraticCurveTo(600, 120, 628, 134); ctx.lineTo(616, 152); ctx.quadraticCurveTo(600, 140, 584, 152); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#d5d5dd';
+        [[600, 96, 22], [622, 70, 28], [650, 40, 34]].forEach((o) => { ctx.beginPath(); ctx.arc(o[0], o[1], o[2], 0, 7); ctx.fill(); ctx.stroke(); });
+        ctx.fillStyle = '#4f9a58';
+        [[1100, 70, 150], [1450, 55, 120]].forEach((o) => { ctx.beginPath(); ctx.moveTo(o[0] - o[2], HOR); ctx.quadraticCurveTo(o[0], HOR - o[1] * 2, o[0] + o[2], HOR); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+      }
+    });
+  }
+  btSprite(ctx, type, t) {
+    ctx.lineWidth = 3; ctx.strokeStyle = '#2b2118'; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    const F = (col) => { ctx.fillStyle = col; ctx.fill(); ctx.stroke(); };
+    if (type === 'rock' || type === 'bigrock') {
+      const s = type === 'bigrock' ? 1.6 : 1;
+      ctx.scale(s, s);
+      ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.ellipse(0, 2, 62, 11, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(-44, -34); ctx.lineTo(-14, -62); ctx.lineTo(24, -52); ctx.lineTo(50, -20); ctx.lineTo(52, 0); ctx.closePath(); F('#8e98a3');
+      ctx.beginPath(); ctx.moveTo(-14, -62); ctx.lineTo(-4, -30); ctx.lineTo(-20, -4); ctx.moveTo(24, -52); ctx.lineTo(14, -26); ctx.stroke();
+      ctx.strokeStyle = '#cfd6dc'; ctx.beginPath(); ctx.moveTo(-38, -30); ctx.lineTo(-18, -52); ctx.stroke();
+    } else if (type === 'log') {
+      ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.ellipse(0, 2, 62, 9, 0, 0, 7); ctx.fill();
+      ctx.save(); ctx.rotate(Math.sin(t * 2) * 0.03);
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-56, -26, 112, 28, 12) : ctx.rect(-56, -26, 112, 28); F('#a8702f');
+      ctx.strokeStyle = '#7a4e1f'; ctx.beginPath(); ctx.moveTo(-30, -20); ctx.lineTo(20, -20); ctx.moveTo(-20, -9); ctx.lineTo(36, -9); ctx.stroke();
+      ctx.strokeStyle = '#2b2118'; ctx.fillStyle = '#d9a064'; ctx.beginPath(); ctx.ellipse(54, -12, 6, 13, 0, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    } else if (type === 'buoy') {
+      ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.ellipse(0, 2, 30, 7, 0, 0, 7); ctx.fill();
+      ctx.save(); ctx.rotate(Math.sin(t * 2.5) * 0.08);
+      ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(-10, -50); ctx.lineTo(10, -50); ctx.lineTo(18, 0); ctx.closePath(); F('#ef4b3c');
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-14, -20); ctx.lineTo(14, -20); ctx.lineTo(12, -32); ctx.lineTo(-12, -32); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, -58, 8, 0, 7); F('#ffd23f');
+      ctx.restore();
+    } else if (type === 'palm') {
+      ctx.beginPath(); ctx.moveTo(-8, 0); ctx.quadraticCurveTo(-14, -70, 4, -135); ctx.lineTo(16, -133); ctx.quadraticCurveTo(2, -70, 10, 0); ctx.closePath(); F('#b07a3a');
+      [-2.95, -2.35, -1.7, -1.1, -0.35].forEach((a) => {
+        ctx.save(); ctx.translate(10, -134); ctx.rotate(a + Math.sin(t * 1.5 + a) * 0.04);
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(40, -38, 92, 12); ctx.quadraticCurveTo(46, -14, 0, 0); F('#3fa05a'); ctx.restore();
+      });
+      ctx.beginPath(); ctx.arc(12, -130, 6, 0, 7); F('#7a4e1f');
+    } else if (type === 'tree') {
+      ctx.beginPath(); ctx.rect(-8, -70, 16, 70); F('#8a5a2b');
+      [[0, -110, 44], [-30, -88, 30], [30, -88, 30]].forEach((o) => { ctx.beginPath(); ctx.arc(o[0], o[1], o[2], 0, 7); F('#3f9a4a'); });
+    } else if (type === 'islet') {
+      ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.ellipse(0, 2, 90, 14, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-76, 0); ctx.quadraticCurveTo(-40, -42, 0, -40); ctx.quadraticCurveTo(46, -42, 78, 0); ctx.closePath(); F('#f4dc96');
+      ctx.save(); ctx.translate(10, 0); ctx.scale(0.6, 0.6); this.btSprite(ctx, 'palm', t); ctx.restore();
+    } else if (type === 'dolphin') {
+      const jump = Math.abs(Math.sin(t * 1.2)); ctx.translate(0, -jump * 40);
+      ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.ellipse(0, jump * 40 + 2, 40, 7, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-38, 0); ctx.bezierCurveTo(-34, -50, 8, -62, 40, -28); ctx.lineTo(58, -38); ctx.lineTo(52, -14); ctx.lineTo(40, -4); ctx.bezierCurveTo(10, -26, -10, -16, -38, 0); ctx.closePath(); F('#6aa6d9');
+      ctx.beginPath(); ctx.moveTo(-6, -42); ctx.lineTo(4, -64); ctx.lineTo(16, -38); ctx.closePath(); F('#5890c4');
+    } else if (type === 'museum') {
+      ctx.fillStyle = '#a8702f'; ctx.beginPath(); ctx.rect(-170, -6, 340, 22); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.rect(-130, -26, 260, 22); F('#e9e0cf');
+      for (let i = -4; i <= 4; i++) { ctx.beginPath(); ctx.rect(i * 26 - 8, -110, 16, 84); F('#fff'); }
+      ctx.beginPath(); ctx.rect(-130, -130, 260, 22); F('#f3ead6');
+      ctx.beginPath(); ctx.moveTo(-146, -128); ctx.lineTo(0, -196); ctx.lineTo(146, -128); ctx.closePath(); F('#ffd23f');
+      ctx.fillStyle = '#2b2118'; ctx.font = '700 17px Fredoka, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('MUSEUM', 0, -112);
+      ctx.beginPath(); ctx.rect(-14, -76, 28, 50); F('#7a4e1f');
+      [[-150, '#ef4b3c'], [150, '#3f7fbf']].forEach((o) => { ctx.beginPath(); ctx.moveTo(o[0], -6); ctx.lineTo(o[0], -80); ctx.stroke(); ctx.beginPath(); ctx.moveTo(o[0], -80); ctx.lineTo(o[0] + 28, -70); ctx.lineTo(o[0], -60); ctx.closePath(); F(o[1]); });
+    }
+  }
+  btBoat(ctx, b, W, H) {
+    const A = this.S.av; const P = this.PAL;
+    const skin = P.skin[A.skin]; const hair = P.hair[A.hair]; const top = P.top[A.top]; const hatC = P.hatC[A.hatC];
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const bob = Math.sin(b.time * 6) * 3;
+    const blink = b.hitT > 0 && Math.floor(b.time * 12) % 2 === 0;
+    ctx.save();
+    ctx.translate(W / 2 + b.steer * 26, 612 + bob);
+    ctx.rotate(b.steer * 0.1);
+    ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#2b2118';
+    ctx.fillStyle = 'rgba(255,255,255,.92)';
+    ctx.beginPath(); ctx.ellipse(-86, 64, 62 + b.speed / 120, 13, 0.15, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(86, 64, 62 + b.speed / 120, 13, -0.15, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, 78, 120, 16, 0, 0, 7); ctx.fill();
+    if (blink) ctx.globalAlpha = 0.35;
+    ctx.fillStyle = '#ef4b3c';
+    ctx.beginPath(); ctx.moveTo(-120, 0); ctx.lineTo(120, 0); ctx.lineTo(96, 66); ctx.quadraticCurveTo(0, 82, -96, 66); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-112, 20); ctx.lineTo(112, 20); ctx.lineTo(106, 40); ctx.lineTo(-106, 40); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = top; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-34, -58, 68, 66, 16) : ctx.rect(-34, -58, 68, 66); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = hair; ctx.beginPath(); ctx.arc(0, -86, 30, 0, 7); ctx.fill(); ctx.stroke();
+    if (A.style === 1) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-30, -86, 60, 56, 18) : ctx.rect(-30, -86, 60, 56); ctx.fill(); ctx.stroke(); }
+    if (A.style === 2) { [-1, 1].forEach((s) => { ctx.beginPath(); ctx.ellipse(s * 34, -66, 9, 20, s * 0.2, 0, 7); ctx.fill(); ctx.stroke(); }); }
+    if (A.style === 3) { ctx.beginPath(); ctx.arc(0, -120, 13, 0, 7); ctx.fill(); ctx.stroke(); }
+    if (A.style === 4) { [-26, 0, 26].forEach((x) => { ctx.beginPath(); ctx.arc(x, -96, 14, 0, 7); ctx.fill(); ctx.stroke(); }); }
+    ctx.fillStyle = skin; ctx.beginPath(); ctx.ellipse(-20, -48, 8, 8, 0, 0, 7); ctx.ellipse(20, -48, 8, 8, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = hatC;
+    if (A.hat === 1) { ctx.beginPath(); ctx.ellipse(0, -104, 46, 10, 0, 0, 7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(0, -108, 26, Math.PI, 0); ctx.fill(); ctx.stroke(); }
+    if (A.hat === 2) { ctx.beginPath(); ctx.arc(0, -100, 29, Math.PI, 0); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-4, -104, 54, 10, 5) : ctx.rect(-4, -104, 54, 10); ctx.fill(); ctx.stroke(); }
+    if (A.hat === 3) { ctx.beginPath(); ctx.arc(0, -100, 31, Math.PI, 0); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-36, -100); ctx.lineTo(36, -100); ctx.stroke(); }
+    if (A.hat === 4) { ctx.beginPath(); ctx.moveTo(-28, -102); ctx.quadraticCurveTo(-10, -140, 28, -146); ctx.quadraticCurveTo(22, -126, 30, -102); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(28, -146, 8, 0, 7); ctx.fill(); ctx.stroke(); }
+    if (A.hat === 5) { ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.moveTo(-24, -104); ctx.lineTo(-24, -128); ctx.lineTo(-12, -116); ctx.lineTo(0, -134); ctx.lineTo(12, -116); ctx.lineTo(24, -128); ctx.lineTo(24, -104); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+  get PAL() {
+    return {
+      skin: ['#f6cfa0', '#f0b98a', '#d9a070', '#a8703f', '#6f4528'],
+      hair: ['#2b2118', '#6b4423', '#c9822b', '#f2d36b', '#c0392b', '#8e44ad'],
+      top: ['#2fa6a0', '#e86a5c', '#f2c14e', '#5aa05a', '#3f7fbf', '#9b6bd3', '#ff8fb1', '#f5f5f5'],
+      bottom: ['#4a5a8a', '#6b4f3a', '#3d3d4a', '#c98f3d', '#5aa05a', '#e86a5c', '#9b6bd3', '#f5f5f5'],
+      shoes: ['#8a5a2b', '#2b2118', '#e86a5c', '#3f7fbf', '#f5f5f5', '#5aa05a'],
+      hatC: ['#e5b84a', '#e86a5c', '#3f7fbf', '#5aa05a', '#9b6bd3', '#f5f5f5']
+    };
+  }
+  setGender(g) {
+    const A = this.S.av;
+    this.setState({ av: Object.assign({}, A, { g: g, style: g === 'g' ? 1 : 0, bt: g === 'g' ? 1 : 2, top: g === 'g' ? 6 : 0 }) });
+  }
+
+  renderVals() {
+    const self = this;
+    const s = this.S;
+    const KINDS = this.KINDS;
+    const NAMES = this.NAMES;
+    const lv = s.lv;
+    const maxLv = this.maxLevel(s.placed);
+    const PAL = this.PAL;
+    const A = s.av;
+    const av = {
+      cls: 'hs-' + A.style + ' ht-' + A.hat + ' bt-' + A.bt + ' gn-' + A.g,
+      skin: PAL.skin[A.skin], hair: PAL.hair[A.hair], top: PAL.top[A.top], bottom: PAL.bottom[A.bottom],
+      shoes: PAL.shoes[A.shoes], hatC: PAL.hatC[A.hatC]
+    };
+    const setAv = (patch) => self.setState({ av: Object.assign({}, self.S.av, patch) });
+    const colRow = (label, key, arr, name) => ({
+      label: label,
+      items: arr.map((c, i) => ({ isCol: true, isTxt: false, col: c, label: name + ' ' + (i + 1), cls: A[key] === i ? 'sel' : '', pick: () => { const p = {}; p[key] = i; setAv(p); } }))
+    });
+    const txtRow = (label, key, arr) => ({
+      label: label,
+      items: arr.map((n, i) => ({ isCol: false, isTxt: true, col: '', label: n, cls: A[key] === i ? 'sel' : '', pick: () => { const p = {}; p[key] = i; setAv(p); } }))
+    });
+    const avRows = [
+      colRow('Haut', 'skin', PAL.skin, 'Hautfarbe'),
+      colRow('Haare', 'hair', PAL.hair, 'Haarfarbe'),
+      txtRow('Frisur', 'style', ['Kurz', 'Lang', 'Zöpfe', 'Dutt', 'Locken']),
+      txtRow('Hut', 'hat', ['Ohne', 'Entdecker', 'Cap', 'Helm', 'Zipfel', 'Krone']),
+      colRow('Hutfarbe', 'hatC', PAL.hatC, 'Hutfarbe'),
+      colRow('Oberteil', 'top', PAL.top, 'Oberteil'),
+      txtRow('Unten', 'bt', ['Hose', 'Rock', 'Shorts']),
+      colRow('Farbe', 'bottom', PAL.bottom, 'Farbe unten'),
+      colRow('Schuhe', 'shoes', PAL.shoes, 'Schuhfarbe')
+    ].map((r, i) => Object.assign(r, { top: 96 + i * 62 }));
+    const bs = s.boat || { pct: 0, hint: false, arrived: false };
+    const boatV = { px: Math.round(340 + bs.pct * 556 - 22), hint: !!bs.hint, arrived: !!bs.arrived };
+    const devV = {
+      open: !!s.devOpen, cls: s.dev ? 'on' : '', label: s.dev ? 'AN' : 'AUS',
+      toggle: () => self.setState({ dev: !self.S.dev }),
+      testBeach: () => { const sc = self.S.scene; self.setState({ devOpen: false }); self.startBoat('beach', sc); },
+      testIsland: () => { const sc = self.S.scene; self.setState({ devOpen: false }); self.startBoat('island', sc); }
+    };
+
+    const L = this.LEVELS[lv];
+    const isStart = s.scene === 'start';
+    const isDig = s.scene === 'dig';
+    const isMuseum = s.scene === 'museum';
+
+    const levels = NAMES.map((name, i) => ({
+      i: i, num: i + 1, name: name, fs: name.length > 12 ? 17 : 26,
+      left: 65 + (i % 5) * 234, top: i < 5 ? 160 : 402,
+      done: this.levelDone(i, s.placed),
+      locked: i > maxLv, open: i <= maxLv, cls: i > maxLv ? 'locked' : '',
+      dis: i > maxLv ? 'true' : 'false',
+      label: i > maxLv ? 'Level gesperrt' : 'Level starten',
+      go: () => { if (i <= self.maxLevel(self.S.placed)) self.startLevel(i); }
+    }));
+
+    const ys = L.spots.map((q) => q.y);
+    const ymin = Math.min.apply(null, ys);
+    const ymax = Math.max.apply(null, ys);
+    const Ly = L.lay;
+    const lay = {
+      dy: Ly.hz - 392, dyT: 'translate(0 ' + (Ly.hz - 392) + ')', sgT: 'translate(' + (Ly.sign - 540) + ' ' + (Ly.hz - 392) + ')', cls: Ly.rect ? 'lay-rect' : '',
+      pitT: 'translate(' + Ly.pit[0] + ' ' + Ly.pit[1] + ') scale(' + (Ly.pit[2] / 580) + ' ' + (Ly.pit[3] / 116) + ') translate(-640 -510)',
+      signLeft: Ly.sign, signTop: 320 + Ly.hz - 392, sgX: Ly.sign - 540
+    };
+    const spots = L.spots.map((sp) => {
+      const key = lv + '-' + sp.id;
+      const p = s.prog[key] || 0;
+      const st = sp.steps;
+      const total = st.length;
+      const locked = !!sp.req && !self.spotDone(lv, sp.req, s.prog);
+      let view; let sc = 1;
+      if (locked) { view = 'locked'; }
+      else if (p >= total) { view = 'done'; }
+      else {
+        const next = st[p];
+        const mov = st.split('').filter((c) => c !== 'b').length;
+        const rem = st.slice(p).split('').filter((c) => c !== 'b').length;
+        const frac = mov ? rem / mov : 0;
+        if (next === 's') { view = 'mound'; sc = 0.75 + 0.55 * frac; }
+        else if (next === 'd') { view = 'rock'; sc = 0.8 + 0.5 * frac; }
+        else if (next === 'x') { view = 'huge'; sc = 1.0 + 0.7 * frac; }
+        else { view = 'layer'; sc = (mov ? 1.0 : 0.85) * ((total - p) >= 2 ? 1 : 0.8); }
+      }
+      sc *= 0.84 + ((ymax > ymin) ? (sp.y - ymin) / (ymax - ymin) : 0.5) * 0.26;
+      const w = Math.round(120 * sc);
+      const h = Math.round(84 * sc);
+      return {
+        left: sp.x - w / 2, top: sp.y - h / 2, w: w, h: h,
+        cls: 'th' + lv + (s.wiggle === key ? ' wig' : ''),
+        isMound: view === 'mound', isRock: view === 'rock', isHuge: view === 'huge',
+        isLayer: view === 'layer', isLocked: view === 'locked', isDone: view === 'done',
+        go: () => self.act(sp)
+      };
+    });
+
+    const actSp = L.spots.find((sp) => sp.id === s.actSpot);
+    const dirt = (s.acting && actSp) ? [0, 1, 2, 3, 4, 5].map((i) => ({
+      left: actSp.x - 30 + i * 11, top: actSp.y - 6, k: (i % 3) + 1, dl: i * 0.09
+    })) : [];
+
+    const tools = L.tools.map((t, j) => ({
+      left: 770 + j * 104, label: self.TOOLLABEL[t],
+      cls: (s.tool === t ? 'sel' : '') + (s.hintTool === t ? ' hint' : ''),
+      isShovel: t === 'shovel', isBrush: t === 'brush', isDrill: t === 'drill', isExc: t === 'excavator',
+      pick: () => self.setTool(t)
+    }));
+
+    const inv = KINDS.map((k, i) => {
+      const key = lv + '-' + k;
+      const have = !!s.collected[key];
+      const done = !!s.placed[key];
+      return {
+        left: 120 + i * 102,
+        cls: (done ? 'done' : (have ? 'have' : 'empty')) + (s.selected === k ? ' sel' : '') + ((s.pop || []).indexOf(key) >= 0 ? ' popin' : ''),
+        done: done,
+        isSkull: k === 'skull', isSpine: k === 'spine', isRibs: k === 'ribs',
+        isTail: k === 'tail', isLegs: k === 'legs', isArm: k === 'arm',
+        pick: () => self.pick(k)
+      };
+    });
+
+    const room = s.room;
+    const D = this.DINOS[room];
+    const skParts = D.order.map((k) => {
+      const p = D.parts[k];
+      const key = room + '-' + k;
+      return {
+        cls: s.placed[key] ? ('on' + (s.fresh === key ? ' fresh' : '')) : 'off',
+        f: p.f || '', s: p.s || '', w: p.w || 0, wi: p.wi || 0, seg: p.seg ? 'seg' : '',
+        t: p.t || '', tw: p.tw || 0, twi: p.twi || 0, dF: p.dF || '', dS: p.dS || ''
+      };
+    });
+
+    const slots = (isMuseum && room === lv) ? KINDS.map((k) => {
+      const key = lv + '-' + k;
+      const hint = s.collected[key] && !s.placed[key] && (!s.selected || s.selected === k);
+      const sl = D.parts[k].slot;
+      return {
+        left: sl[0] * 1.15 - 36, top: sl[1] * 1.15 - 36,
+        cls: (hint ? 'hint' : '') + (s.wiggle === k ? ' wig' : ''),
+        place: () => self.place(k)
+      };
+    }) : [];
+
+    const SH = ['#e86a5c', '#5aa05a', '#f2c14e', '#9b6bd3', '#3f7fbf', '#ff8a65', '#4db6ac', '#ab47bc'];
+    const PN = ['#4a5a8a', '#6b4f3a', '#3d3d4a', '#3f7fbf', '#4a6a4a'];
+    const HR = ['#5a3a22', '#d8c36a', '#2b2118', '#b0b0b8', '#8a5a2b'];
+    const SK = ['#f0b98a', '#8d5a3b', '#f6cfa0', '#e8b48a'];
+    const POS = [[320, 584, 80, false], [1000, 590, 84, false], [1090, 572, 60, false], [440, 598, 76, true]];
+    const BOB = ['vb1', 'vb2', 'vb3', 'vb2'];
+    const cnt = room % 2 === 0 ? 4 : 3;
+    const visitors = [];
+    for (let j = 0; j < cnt; j++) {
+      const P = POS[j];
+      const x = P[0] + ((room * 37 + j * 23) % 60) - 30;
+      visitors.push({
+        left: x - P[2] / 2, top: P[1] - P[2] * 1.7, w: P[2], h: P[2] * 1.7, z: 10,
+        shirt: SH[(room + j * 3) % 8], pants: PN[(room + j) % 5], hair: HR[(room * 2 + j) % 5], skin: SK[(room + j) % 4],
+        bob: BOB[j], wrapCls: P[3] ? 'vwalk' : ''
+      });
+    }
+
+    const dots = NAMES.map((n, i) => ({
+      left: 770 + i * 49, n: i + 1,
+      cls: (i === room ? 'cur' : '') + (this.levelDone(i, s.placed) ? ' done' : '') + (i > maxLv ? ' lockd' : ''),
+      go: () => self.jumpRoom(i)
+    }));
+
+    const palette = ['#ff5252', '#ffd23f', '#4caf50', '#2196f3', '#ab47bc', '#ff9800'];
+    const confetti = s.cheer ? Array.from({ length: 24 }, (_, i) => ({
+      x: (i * 53) % 1260, col: palette[i % 6], d: (i % 8) * 0.18, s: 10 + (i % 3) * 4, s2: 16 + (i % 4) * 3
+    })) : [];
+
+    const exOn = s.tool === 'excavator';
+    const bu = s.burst || { x: 0, y: 0, junk: false };
+
+    return {
+      isStart: isStart, isDig: isDig, isMuseum: isMuseum, inGame: isDig || isMuseum,
+      isLaunch: s.scene === 'launch', isChar: s.scene === 'char', isBoat: s.scene === 'boat',
+      showDev: s.scene === 'launch' || s.scene === 'start' || s.scene === 'char',
+      av: av, avRows: avRows, boat: boatV, dev: devV,
+      startGame: () => self.setState({ scene: 'char', devOpen: false }),
+      toChar: () => self.setState({ scene: 'char', devOpen: false }),
+      toLaunch: () => self.setState({ scene: 'launch', devOpen: false }),
+      toLevels: () => self.setState({ scene: 'start', devOpen: false }),
+      pickGender: (g) => self.setGender(g),
+      genB: () => self.setGender('b'), genG: () => self.setGender('g'),
+      genBCls: s.av.g === 'b' ? 'sel' : '', genGCls: s.av.g === 'g' ? 'sel' : '',
+      skipBoat: () => self.skipBoat(),
+      toggleDevPanel: () => self.setState({ devOpen: !s.devOpen }),
+      th: 'th' + lv, thCls: 'th' + lv + (Ly.rect ? ' lay-rect' : ''), signText: L.sign, lay: lay,
+      levels: levels, spots: spots, tools: tools,
+      hasDirt: !!(s.acting && actSp), dirt: dirt,
+      hasBurst: !!s.burst, burst: bu, burstJunk: !!bu.junk, burstBone: !bu.junk,
+      goMuseum: () => self.goTo('museum'),
+      goDig: () => self.goTo('dig'),
+      goHome: () => self.goHome(),
+      goPrev: () => self.moveRoom(-1),
+      goNext: () => self.moveRoom(1),
+      hasPrev: room > 0, hasNext: room < maxLv,
+      rm: { cls: 't' + room + ' cl' + (room % 5) + ' cr' + ((room * 2 + 1) % 5), title: 'SAAL ' + (room + 1) + ' · ' + NAMES[room].toUpperCase() },
+      skParts: skParts,
+      skCls: (s.cheer && room === lv) ? 'tada' : '',
+      slots: slots, visitors: visitors, inv: inv, dots: dots,
+      ch: {
+        x: s.cx, y: s.cy, dur: s.dur, face: s.face,
+        anim: s.acting === 'shovel' ? 'a-dig' : (s.acting === 'brush' ? 'a-brush' : (s.acting === 'drill' ? 'a-drill' : (s.walking ? 'a-walk' : 'a-idle'))),
+        shCls: s.tool === 'shovel' ? '' : 'hide',
+        brCls: s.tool === 'brush' ? '' : 'hide',
+        drCls: s.tool === 'drill' ? '' : 'hide',
+        exCls: exOn ? '' : 'hide', exX: s.cx + s.face * 130,
+        exAnim: s.acting === 'excavator' ? 'exwork' : ''
+      },
+      shovelCls: '', brushCls: '',
+      cheer: s.cheer, cheerName: NAMES[lv], hasNextLv: lv < 9, confetti: confetti,
+      doNext: () => self.nextLevel(),
+      doLook: () => self.setState({ cheer: false })
+    };
+  }
+}
+</script>
+<script>
+class DCLogic {
+  constructor() { this.state = {}; this.props = {}; }
+  setState(p) {
+    this.state = Object.assign({}, this.state, typeof p === 'function' ? p(this.state) : p);
+    schedule();
+  }
+}
+function lookup(path, stack) {
+  const parts = path.trim().split('.');
+  for (let i = stack.length - 1; i >= 0; i--) {
+    if (parts[0] in stack[i]) {
+      let v = stack[i][parts[0]];
+      for (let k = 1; k < parts.length; k++) v = v == null ? undefined : v[parts[k]];
+      return v;
+    }
+  }
+  return undefined;
+}
+function interp(str, stack) {
+  const m = str.match(/^\s*\{\{([^}]+)\}\}\s*$/);
+  if (m) return lookup(m[1], stack);
+  return str.replace(/\{\{([^}]+)\}\}/g, (_, p) => { const v = lookup(p, stack); return v == null ? '' : String(v); });
+}
+function kids(node, stack, out) { node.childNodes.forEach((c) => build(c, stack, out)); }
+function build(node, stack, out) {
+  if (node.nodeType === 3) { out.appendChild(document.createTextNode(String(interp(node.nodeValue, stack) ?? ''))); return; }
+  if (node.nodeType !== 1) return;
+  const tag = node.localName;
+  if (tag === 'sc-if') { if (interp(node.getAttribute('value'), stack)) kids(node, stack, out); return; }
+  if (tag === 'sc-for') {
+    const list = interp(node.getAttribute('list'), stack) || [];
+    const as = node.getAttribute('as');
+    list.forEach((item) => { const o = {}; o[as] = item; kids(node, stack.concat([o]), out); });
+    return;
+  }
+  const el = document.createElementNS(node.namespaceURI, node.localName);
+  for (const a of Array.from(node.attributes)) {
+    if (/^on/i.test(a.name)) { const f = interp(a.value, stack); if (typeof f === 'function') el.__click = f; continue; }
+    const v = interp(a.value, stack);
+    if (v == null) continue;
+    el.setAttribute(a.name, String(v));
+  }
+  kids(node, stack, el);
+  out.appendChild(el);
+}
+function syncAttrs(o, n) {
+  for (const a of Array.from(n.attributes)) if (o.getAttribute(a.name) !== a.value) o.setAttribute(a.name, a.value);
+  for (const a of Array.from(o.attributes)) if (!n.hasAttribute(a.name)) o.removeAttribute(a.name);
+}
+function morph(oldP, newP) {
+  const nk = Array.from(newP.childNodes);
+  for (let i = 0; i < nk.length; i++) {
+    const nn = nk[i]; const oo = oldP.childNodes[i];
+    if (!oo) { oldP.appendChild(nn); continue; }
+    if (nn.nodeType === 3 && oo.nodeType === 3) { if (oo.nodeValue !== nn.nodeValue) oo.nodeValue = nn.nodeValue; continue; }
+    if (nn.nodeType === 1 && oo.nodeType === 1 && nn.namespaceURI === oo.namespaceURI && nn.localName === oo.localName) {
+      syncAttrs(oo, nn); oo.__click = nn.__click; morph(oo, nn); continue;
+    }
+    oldP.replaceChild(nn, oo);
+  }
+  while (oldP.childNodes.length > nk.length) oldP.removeChild(oldP.lastChild);
+}
+const app = document.getElementById('app');
+const tpl = document.getElementById('tpl').content;
+const comp = new (new Function(document.getElementById('logic').textContent + '; return Component;')())();
+let pending = false;
+function schedule() { if (!pending) { pending = true; requestAnimationFrame(() => { pending = false; render(); }); } }
+function render() {
+  const vals = comp.renderVals();
+  const frag = document.createElement('div');
+  tpl.childNodes.forEach((c) => build(c, [vals], frag));
+  morph(app, frag);
+}
+app.addEventListener('click', (e) => {
+  let n = e.target;
+  while (n && n !== app) { if (n.__click) { n.__click(e); return; } n = n.parentNode; }
+});
+function fit() {
+  const s = Math.min(innerWidth / 1280, innerHeight / 720);
+  const st = document.getElementById('stage');
+  st.style.transform = 'scale(' + s + ')';
+  st.style.left = ((innerWidth - 1280 * s) / 2) + 'px';
+  st.style.top = ((innerHeight - 720 * s) / 2) + 'px';
+}
+addEventListener('resize', fit); fit(); render();
+</script>
+</body>
+</html>
